@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Discover emerging student talent and their portfolio work.">
+    <title>Folio — Student Portfolio Directory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <svg class="icon-library" aria-hidden="true">
+      <symbol id="icon-arrow-up-right" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
+      <symbol id="icon-chevron-down" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></symbol>
+      <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
+      <symbol id="icon-location" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></symbol>
+      <symbol id="icon-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.3 10.8 7.4-4.5M8.3 13.2l7.4 4.5"/></symbol>
+      <symbol id="icon-spark" viewBox="0 0 24 24"><path d="M12 3c.5 4.9 3.1 7.5 8 8-4.9.5-7.5 3.1-8 8-.5-4.9-3.1-7.5-8-8 4.9-.5 7.5-3.1 8-8Z"/></symbol>
+    </svg>
+
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="Folio home">
+        <span class="brand-mark"><svg><use href="#icon-spark"></use></svg></span>
+        <span>Folio<span class="brand-dot">.</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a class="active" href="#directory">Directory</a>
+        <a href="#about">About the cohort</a>
+      </nav>
+      <a class="header-link" href="mailto:hello@folio.edu">Partner with us <svg><use href="#icon-arrow-up-right"></use></svg></a>
+    </header>
+
+    <main>
+      <section class="hero" id="about">
+        <div class="eyebrow"><span></span> Portfolio class of 2026</div>
+        <div class="hero-grid">
+          <h1>Meet the next<br><em>creative force.</em></h1>
+          <div class="hero-copy">
+            <p>A curated directory of ambitious makers, strategic thinkers, and multidisciplinary problem-solvers ready to shape what comes next.</p>
+            <a href="#directory">Explore the cohort <span><svg><use href="#icon-arrow-up-right"></use></svg></span></a>
+          </div>
+        </div>
+        <div class="hero-orbit" aria-hidden="true">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <div class="orbit-dot dot-one"></div>
+          <div class="orbit-dot dot-two"></div>
+          <span>26</span>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="Cohort summary">
+        <article><span id="stat-students">00</span><p>Published<br>portfolios</p></article>
+        <article><span id="stat-projects">00</span><p>Featured<br>projects</p></article>
+        <article><span id="stat-available">00</span><p>Open to<br>opportunities</p></article>
+        <article><span id="stat-disciplines">00</span><p>Creative<br>disciplines</p></article>
+      </section>
+
+      <section class="directory" id="directory">
+        <div class="section-heading">
+          <div>
+            <span class="section-index">01 / DIRECTORY</span>
+            <h2>Find your next<br><em>standout.</em></h2>
+          </div>
+          <p>Every profile is shaped around real work, measurable outcomes, and the person behind the practice.</p>
+        </div>
+
+        <div class="toolbar" aria-label="Portfolio filters">
+          <label class="search-field">
+            <svg><use href="#icon-search"></use></svg>
+            <span class="sr-only">Search portfolios</span>
+            <input id="search-input" type="search" placeholder="Search people, skills, or projects">
+          </label>
+          <label class="select-field">
+            <span class="sr-only">Filter by discipline</span>
+            <select id="discipline-filter">
+              <option value="all">All disciplines</option>
+            </select>
+            <svg><use href="#icon-chevron-down"></use></svg>
+          </label>
+          <label class="select-field">
+            <span class="sr-only">Filter by availability</span>
+            <select id="availability-filter">
+              <option value="all">Any availability</option>
+              <option value="open">Open to work</option>
+              <option value="selective">Selective</option>
+            </select>
+            <svg><use href="#icon-chevron-down"></use></svg>
+          </label>
+          <label class="select-field sort-field">
+            <span class="sr-only">Sort portfolios</span>
+            <select id="sort-select">
+              <option value="featured">Featured first</option>
+              <option value="name">Name A–Z</option>
+              <option value="year">Graduation year</option>
+            </select>
+            <svg><use href="#icon-chevron-down"></use></svg>
+          </label>
+        </div>
+
+        <div class="results-meta">
+          <p><span id="result-count">0</span> portfolios</p>
+          <p><svg><use href="#icon-grid"></use></svg> Updated June 2026</p>
+        </div>
+        <div class="student-grid" id="student-grid"></div>
+        <div class="empty-state" id="empty-state" hidden>
+          <span>NO MATCHES</span>
+          <h3>Try a broader search.</h3>
+          <button id="clear-filters" type="button">Clear all filters</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand footer-brand" href="#"><span class="brand-mark"><svg><use href="#icon-spark"></use></svg></span><span>Folio<span class="brand-dot">.</span></span></a>
+      <p>Student work, thoughtfully presented.<br>Built for discovery and opportunity.</p>
+      <p class="footer-note">Public portfolio directory<br>© 2026 Folio</p>
+    </footer>
+
+    <div class="detail-backdrop" id="detail-backdrop" hidden></div>
+    <aside class="detail-panel" id="detail-panel" aria-label="Student portfolio details" aria-hidden="true"></aside>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
