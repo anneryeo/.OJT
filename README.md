@@ -1,6 +1,6 @@
-# Folio — Student Portfolio Directory
+# Mapua Student Portfolio Registry
 
-A dependency-free public dashboard for discovering student portfolios.
+A dependency-free OJT prototype for discovering Mapua student portfolios.
 
 ## Run locally
 
@@ -10,4 +10,10 @@ Open `index.html` directly, or serve the directory with any static file server.
 npx serve .
 ```
 
-Student content is maintained in the `students` array in `app.js`. Product requirements and future admin handoff notes are in `.local/docs/PRD.md`.
+The prototype includes 33 sample profiles, visitor submission, admin approval/removal, filters, profile details, and a documented production database schema.
+
+Defense and product documentation:
+
+- `.local/docs/PRD.md`
+- `.local/docs/README.md`
+- `.local/docs/DATABASE_SCHEMA.sql`

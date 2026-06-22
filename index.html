@@ -3,122 +3,196 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Discover emerging student talent and their portfolio work.">
-    <title>Folio — Student Portfolio Directory</title>
+    <meta name="description" content="Mapua University inspired student portfolio directory prototype for OJT presentation.">
+    <title>Mapua Student Portfolio Registry</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <svg class="icon-library" aria-hidden="true">
       <symbol id="icon-arrow-up-right" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
+      <symbol id="icon-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/></symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
       <symbol id="icon-chevron-down" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
       <symbol id="icon-close" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></symbol>
       <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
       <symbol id="icon-location" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
       <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></symbol>
       <symbol id="icon-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.3 10.8 7.4-4.5M8.3 13.2l7.4 4.5"/></symbol>
-      <symbol id="icon-spark" viewBox="0 0 24 24"><path d="M12 3c.5 4.9 3.1 7.5 8 8-4.9.5-7.5 3.1-8 8-.5-4.9-3.1-7.5-8-8 4.9-.5 7.5-3.1 8-8Z"/></symbol>
+      <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 2.9 8.7 7 10 4.1-1.3 7-5.5 7-10V6z"/></symbol>
+      <symbol id="icon-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></symbol>
     </svg>
 
     <header class="site-header">
-      <a class="brand" href="#" aria-label="Folio home">
-        <span class="brand-mark"><svg><use href="#icon-spark"></use></svg></span>
-        <span>Folio<span class="brand-dot">.</span></span>
+      <a class="brand" href="#top" aria-label="Mapua Student Portfolio Registry home">
+        <span class="brand-mark">M</span>
+        <span>Mapua Portfolio Registry</span>
       </a>
       <nav class="main-nav" aria-label="Main navigation">
-        <a class="active" href="#directory">Directory</a>
-        <a href="#about">About the cohort</a>
+        <a href="#directory">Directory</a>
+        <a href="#submit">Submit Profile</a>
+        <a href="#cms">Admin CMS</a>
+        <a href="#about">About</a>
       </nav>
-      <a class="header-link" href="mailto:hello@folio.edu">Partner with us <svg><use href="#icon-arrow-up-right"></use></svg></a>
+      <a class="header-link" href="#credits">Credits</a>
     </header>
 
-    <main>
-      <section class="hero" id="about">
-        <div class="eyebrow"><span></span> Portfolio class of 2026</div>
-        <div class="hero-grid">
-          <h1>Meet the next<br><em>creative force.</em></h1>
-          <div class="hero-copy">
-            <p>A curated directory of ambitious makers, strategic thinkers, and multidisciplinary problem-solvers ready to shape what comes next.</p>
-            <a href="#directory">Explore the cohort <span><svg><use href="#icon-arrow-up-right"></use></svg></span></a>
+    <main id="top">
+      <section class="hero">
+        <div class="hero-content">
+          <p class="eyebrow"><span></span> OJT Prototype / Mapua University inspired</p>
+          <h1>Student portfolios for Cardinal-ready talent discovery.</h1>
+          <p class="hero-copy">A professional directory for showcasing Mapua technology, computing, analytics, and design students to recruiters, faculty reviewers, mentors, and industry partners.</p>
+          <div class="hero-actions">
+            <a class="primary-action" href="#directory">Browse students <svg><use href="#icon-arrow-up-right"></use></svg></a>
+            <a class="secondary-action" href="#submit">Submit your profile</a>
           </div>
-        </div>
-        <div class="hero-orbit" aria-hidden="true">
-          <div class="orbit orbit-one"></div>
-          <div class="orbit orbit-two"></div>
-          <div class="orbit-dot dot-one"></div>
-          <div class="orbit-dot dot-two"></div>
-          <span>26</span>
         </div>
       </section>
 
-      <section class="stats" aria-label="Cohort summary">
-        <article><span id="stat-students">00</span><p>Published<br>portfolios</p></article>
-        <article><span id="stat-projects">00</span><p>Featured<br>projects</p></article>
-        <article><span id="stat-available">00</span><p>Open to<br>opportunities</p></article>
-        <article><span id="stat-disciplines">00</span><p>Creative<br>disciplines</p></article>
+      <section class="stats" aria-label="Registry summary">
+        <article><span id="stat-students">00</span><p>Published profiles</p></article>
+        <article><span id="stat-pending">00</span><p>Pending submissions</p></article>
+        <article><span id="stat-projects">00</span><p>Featured projects</p></article>
+        <article><span id="stat-courses">00</span><p>Course categories</p></article>
+      </section>
+
+      <section class="about-band" id="about">
+        <div>
+          <p class="section-index">WHY THIS MATTERS</p>
+          <h2>A portfolio bridge between Mapua formation and industry opportunity.</h2>
+        </div>
+        <div class="about-copy">
+          <p>This prototype supports Mapua's technology-driven identity by turning student output into searchable evidence: projects, skills, course paths, year levels, availability, and measurable outcomes.</p>
+          <p>For a university known for engineering, computing, innovation, and industry relevance, a registry like this helps students present work professionally while giving partners a faster way to discover qualified talent.</p>
+        </div>
       </section>
 
       <section class="directory" id="directory">
         <div class="section-heading">
           <div>
-            <span class="section-index">01 / DIRECTORY</span>
-            <h2>Find your next<br><em>standout.</em></h2>
+            <p class="section-index">01 / PUBLIC DIRECTORY</p>
+            <h2>Find students by year, course, skill, and status.</h2>
           </div>
-          <p>Every profile is shaped around real work, measurable outcomes, and the person behind the practice.</p>
+          <p>All filters work together. Published visitor submissions appear here after approval in the admin CMS.</p>
         </div>
 
         <div class="toolbar" aria-label="Portfolio filters">
           <label class="search-field">
             <svg><use href="#icon-search"></use></svg>
             <span class="sr-only">Search portfolios</span>
-            <input id="search-input" type="search" placeholder="Search people, skills, or projects">
+            <input id="search-input" type="search" placeholder="Search names, skills, courses, or projects">
           </label>
           <label class="select-field">
-            <span class="sr-only">Filter by discipline</span>
-            <select id="discipline-filter">
-              <option value="all">All disciplines</option>
-            </select>
+            <span class="sr-only">Filter by year level</span>
+            <select id="year-filter"><option value="all">All year levels</option></select>
+            <svg><use href="#icon-chevron-down"></use></svg>
+          </label>
+          <label class="select-field">
+            <span class="sr-only">Filter by course type</span>
+            <select id="course-filter"><option value="all">All course types</option></select>
             <svg><use href="#icon-chevron-down"></use></svg>
           </label>
           <label class="select-field">
             <span class="sr-only">Filter by availability</span>
             <select id="availability-filter">
               <option value="all">Any availability</option>
-              <option value="open">Open to work</option>
+              <option value="open">Open to OJT</option>
               <option value="selective">Selective</option>
+              <option value="unavailable">Not available</option>
             </select>
             <svg><use href="#icon-chevron-down"></use></svg>
           </label>
-          <label class="select-field sort-field">
+          <label class="select-field">
             <span class="sr-only">Sort portfolios</span>
             <select id="sort-select">
               <option value="featured">Featured first</option>
-              <option value="name">Name A–Z</option>
-              <option value="year">Graduation year</option>
+              <option value="name">Name A-Z</option>
+              <option value="year">Year level</option>
             </select>
             <svg><use href="#icon-chevron-down"></use></svg>
           </label>
         </div>
 
         <div class="results-meta">
-          <p><span id="result-count">0</span> portfolios</p>
+          <p><span id="result-count">0</span> profiles shown</p>
           <p><svg><use href="#icon-grid"></use></svg> Updated June 2026</p>
         </div>
         <div class="student-grid" id="student-grid"></div>
         <div class="empty-state" id="empty-state" hidden>
           <span>NO MATCHES</span>
           <h3>Try a broader search.</h3>
-          <button id="clear-filters" type="button">Clear all filters</button>
+          <button id="clear-filters" type="button">Clear filters</button>
+        </div>
+      </section>
+
+      <section class="submit-section" id="submit">
+        <div class="section-heading compact">
+          <div>
+            <p class="section-index">02 / VISITOR SUBMISSION</p>
+            <h2>Students can request publication.</h2>
+          </div>
+          <p>Submissions are saved as pending records until an admin approves them in the CMS prototype.</p>
+        </div>
+        <form class="profile-form" id="profile-form">
+          <label>Full name<input name="name" required maxlength="80" placeholder="Juan Dela Cruz"></label>
+          <label>Email<input name="email" required type="email" placeholder="student@mymail.mapua.edu.ph"></label>
+          <label>Course / program<input name="program" required maxlength="90" placeholder="BS Data Science"></label>
+          <label>Year level
+            <select name="yearLevel" required>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+              <option value="Fresh Grad">Fresh Grad</option>
+            </select>
+          </label>
+          <label>Course type
+            <select name="courseType" required>
+              <option>Computer Science</option>
+              <option>Information Technology</option>
+              <option>Information Systems</option>
+              <option>Data Science</option>
+              <option>Tech Courses</option>
+              <option>Media and Design</option>
+            </select>
+          </label>
+          <label>Portfolio URL<input name="portfolioUrl" required type="url" placeholder="https://example.com"></label>
+          <label class="wide">Skills<input name="skills" required placeholder="Python, UX Research, SQL, Figma"></label>
+          <label class="wide">Short bio<textarea name="bio" required maxlength="420" placeholder="Describe your strengths, focus area, and project interests."></textarea></label>
+          <button class="primary-action form-button" type="submit">Submit for admin approval <svg><use href="#icon-user-plus"></use></svg></button>
+        </form>
+      </section>
+
+      <section class="cms-section" id="cms">
+        <div class="section-heading compact">
+          <div>
+            <p class="section-index">03 / ADMIN CMS PROTOTYPE</p>
+            <h2>Approve, publish, or remove profiles.</h2>
+          </div>
+          <p>This static prototype models the admin workflow with local storage. Production would connect the same states to the documented database and authentication.</p>
+        </div>
+        <div class="cms-grid">
+          <article>
+            <h3>Pending submissions</h3>
+            <div id="pending-list" class="cms-list"></div>
+          </article>
+          <article>
+            <h3>Published CMS records</h3>
+            <div id="published-list" class="cms-list"></div>
+          </article>
         </div>
       </section>
     </main>
 
-    <footer>
-      <a class="brand footer-brand" href="#"><span class="brand-mark"><svg><use href="#icon-spark"></use></svg></span><span>Folio<span class="brand-dot">.</span></span></a>
-      <p>Student work, thoughtfully presented.<br>Built for discovery and opportunity.</p>
-      <p class="footer-note">Public portfolio directory<br>© 2026 Folio</p>
+    <footer id="credits">
+      <div>
+        <a class="brand footer-brand" href="#top"><span class="brand-mark">M</span><span>Mapua Portfolio Registry</span></a>
+        <p>Created by Christine Julliane Reyes, 3rd Year BS Data Science Student.</p>
+      </div>
+      <p class="footer-note">Prototype for OJT defense / Public portfolio discovery / 2026</p>
     </footer>
 
     <div class="detail-backdrop" id="detail-backdrop" hidden></div>
