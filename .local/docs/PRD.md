@@ -4,15 +4,25 @@
 
 The Mapua Student Portfolio Registry is a defense-ready OJT prototype for a public student portfolio website. It helps recruiters, faculty, mentors, and industry partners discover Mapua University students by course type, year level, skills, availability, and project evidence.
 
-The prototype is static and dependency-free, but the information architecture is designed for a future database-backed CMS. It includes more than 30 example student profiles, visitor profile submission, administrator approval/removal, and documentation for a production database schema.
+The prototype is static and dependency-free, but the information architecture is designed for a future database-backed CMS. It includes more than 30 example student profiles, visitor profile submission, a private admin route, administrator approval/edit/return/archive workflows, and documentation for a production database schema.
 
 ## Product Goals
 
 - Present Mapua student work in a professional, school-aligned directory.
 - Support discovery across Computer Science, Information Technology, Information Systems, Data Science, technology courses, and Media and Design.
 - Let students or visitors submit a profile for admin review before publication.
-- Give administrators a clear approval/removal workflow.
+- Give administrators a clear end-to-end moderation workflow: add, edit, save, approve, return with comments, archive/disapprove, restore, delete, and persist changes during the session.
 - Provide documentation strong enough for an OJT defense: PRD, user flow, architecture, database schema, run instructions, and presentation points.
+
+## Chapter 3 Alignment
+
+This prototype supports the project document's Chapter 3 framing:
+
+- **Project overview:** a dynamic, interactive Student Portfolio Dashboard that centralizes student achievements, academic standing, and project history.
+- **Problem/opportunity:** previous student data and portfolio artifacts were unstructured and fragmented, making holistic review difficult for faculty and administrators.
+- **Objectives:** clean and structure student data, model it as a relational database, design an administrator-friendly dashboard, and connect the data model to the frontend for live prototype updates.
+- **Significance:** reduce administrative friction, improve visibility into student capabilities, and support institutional partnerships or accreditation presentations.
+- **Scope/limitations:** scoped to School of IT portfolio data; real-time syncing with external Mapua systems such as Blackboard is outside this prototype.
 
 ## Brand Direction
 
@@ -59,18 +69,25 @@ Reference sites used for direction:
   - Email
   - Program
   - Year level
-  - Course type
   - Portfolio URL
   - Skills
   - Short bio
+- Course type is inferred from the program text to avoid redundant public input.
 - New submissions are saved as pending records.
 - Pending submissions do not appear publicly until approved.
 
-### Admin CMS Prototype
+### Private Admin CMS Prototype
 
-- Show pending submissions.
+- Accessed through `#/admin` in local/static mode, or `/admin` when hosted with a rewrite to `index.html`.
+- Hidden from the public navigation and public scroll flow.
+- Uses a fake login for demonstration; any email and password can start the admin session.
+- Show pending, returned, published, and archived/disapproved records.
+- Add new student profiles directly.
+- Edit and save existing seed profiles or submitted profiles.
 - Approve pending profiles so they become public.
-- Remove visitor-submitted profiles from the website.
+- Return submissions with comments for revision.
+- Archive or disapprove published or pending profiles.
+- Restore archived records.
 - Store CMS state in browser local storage for prototype purposes.
 - Future production implementation should replace local storage with authenticated admin access and the documented database schema.
 
@@ -89,6 +106,7 @@ Core fields:
 Statuses:
 
 - `pending`: submitted but not approved
+- `returned`: sent back with admin comments
 - `published`: visible on the website
 - `removed`: hidden or archived by admin
 
@@ -98,8 +116,10 @@ Statuses:
 - Search, year level filter, course filter, availability filter, and sorting work together.
 - Selecting a student opens the correct details.
 - Visitors can submit a profile.
-- Admin can approve a submitted profile and make it appear publicly.
-- Admin can remove submitted records from the website.
+- Public submission only asks for program; course type is inferred.
+- Admin CMS is not visible in public navigation or public scrolling.
+- Admin can log in through the private admin route with fake credentials.
+- Admin can add, edit, save, approve, return with comments, archive/disapprove, restore, and delete profiles.
 - Stats update when submissions are approved or removed.
 - Profile sharing uses Web Share API where available and clipboard fallback otherwise.
 - The interface remains usable on desktop and mobile.
@@ -118,7 +138,7 @@ Statuses:
 The current prototype is production-shaped but not production-hosted. To make it production-grade, the next phase should add:
 
 - Real database using the schema in `.local/docs/DATABASE_SCHEMA.sql`.
-- Authentication and role-based admin access.
+- Real authentication and role-based admin access.
 - Server-side validation and moderation audit logs.
 - File/avatar upload storage if profile images are required.
 - Email verification for submitters.
@@ -133,6 +153,7 @@ The current prototype is production-shaped but not production-hosted. To make it
 - Users can filter by year level, course type, and availability.
 - Fresh Grad status includes years since graduation.
 - Visitors can submit a profile.
-- Admin CMS can approve visitor submissions and remove published or pending profiles.
+- Admin CMS is accessible as a separate admin route, not as a public page section.
+- Admin CMS can add, edit, save, approve, return with comments, archive/disapprove, restore, and delete profiles.
 - PRD, database schema, README, user flow diagram, architecture, and defense notes exist in `.local/docs`.
 - Root README explains how to run the app.

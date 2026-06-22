@@ -1,6 +1,8 @@
 const icon = (name) => `<svg aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 
 const STORAGE_KEY = "mapuaPortfolioRegistry";
+const ADMIN_LIST_LIMIT = 5;
+const COURSE_FILTER_OPTIONS = ["Computer Science", "Data Science", "Information Systems", "Information Technology", "Media and Design"];
 
 const studentSeeds = [
   ["ana-reyes", "Ana Sofia Reyes", "AS", "Data Analyst Intern", "Data Science", "BS Data Science", "3rd Year", "Makati", "open", true, ["Python", "SQL", "Power BI", "Statistics"], "Built a dashboard that reduced manual reporting time for a campus organization.", "Enrollment Insights", "Cleaned and visualized enrollment trend data.", "42% faster reporting"],
@@ -61,6 +63,8 @@ const seedStudents = studentSeeds.map((item) => ({
 }));
 
 const state = loadState();
+let activeEditorId = "";
+const adminListExpanded = { pending: false, published: false, removed: false };
 const grid = document.querySelector("#student-grid");
 const resultCount = document.querySelector("#result-count");
 const emptyState = document.querySelector("#empty-state");
@@ -75,15 +79,49 @@ const toast = document.querySelector("#toast");
 const profileForm = document.querySelector("#profile-form");
 const pendingList = document.querySelector("#pending-list");
 const publishedList = document.querySelector("#published-list");
+const removedList = document.querySelector("#removed-list");
+const adminListControls = {
+  pending: {
+    search: document.querySelector("#pending-search"),
+    filter: document.querySelector("#pending-filter"),
+    list: pendingList
+  },
+  published: {
+    search: document.querySelector("#published-search"),
+    filter: document.querySelector("#published-filter"),
+    list: publishedList
+  },
+  removed: {
+    search: document.querySelector("#removed-search"),
+    filter: document.querySelector("#removed-filter"),
+    list: removedList
+  }
+};
+const adminView = document.querySelector("#admin-view");
+const publicHeader = document.querySelector(".site-header");
+const publicMain = document.querySelector("#top");
+const publicFooter = document.querySelector("#credits");
+const loginPanel = document.querySelector("#login-panel");
+const loginForm = document.querySelector("#login-form");
+const adminDashboard = document.querySelector("#admin-dashboard");
+const adminForm = document.querySelector("#admin-form");
+const editorTitle = document.querySelector("#editor-title");
 
 function loadState() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (parsed && Array.isArray(parsed.submissions) && Array.isArray(parsed.removedIds)) return parsed;
+    if (parsed && Array.isArray(parsed.submissions) && Array.isArray(parsed.removedIds)) {
+      return {
+        submissions: parsed.submissions,
+        removedIds: parsed.removedIds,
+        edits: parsed.edits || {},
+        adminLoggedIn: Boolean(parsed.adminLoggedIn)
+      };
+    }
   } catch (error) {
     console.warn("Unable to load CMS state", error);
   }
-  return { submissions: [], removedIds: [] };
+  return { submissions: [], removedIds: [], edits: {}, adminLoggedIn: false };
 }
 
 function saveState() {
@@ -91,17 +129,37 @@ function saveState() {
 }
 
 function allStudents() {
-  const approved = state.submissions.filter((student) => student.status === "published");
-  return [...seedStudents, ...approved].filter((student) => !state.removedIds.includes(student.id));
+  const editedSeeds = seedStudents.map((student) => applyEdit(student));
+  const approved = state.submissions.filter((student) => student.status === "published").map((student) => applyEdit(student));
+  return [...editedSeeds, ...approved].filter((student) => !state.removedIds.includes(student.id));
 }
 
 function pendingStudents() {
-  return state.submissions.filter((student) => student.status === "pending" && !state.removedIds.includes(student.id));
+  return state.submissions
+    .filter((student) => ["pending", "returned"].includes(student.status) && !state.removedIds.includes(student.id))
+    .map((student) => applyEdit(student));
+}
+
+function removedStudents() {
+  const seedArchived = seedStudents.filter((student) => state.removedIds.includes(student.id)).map((student) => ({ ...applyEdit(student), status: "removed" }));
+  const submittedArchived = state.submissions.filter((student) => state.removedIds.includes(student.id) || student.status === "removed").map((student) => ({ ...applyEdit(student), status: "removed" }));
+  return [...seedArchived, ...submittedArchived];
+}
+
+function applyEdit(student) {
+  return { ...student, ...(state.edits[student.id] || {}) };
+}
+
+function findEditableStudent(id) {
+  return allStudents().find((student) => student.id === id) || pendingStudents().find((student) => student.id === id) || removedStudents().find((student) => student.id === id);
 }
 
 function initializeFilters() {
   ["1st Year", "2nd Year", "3rd Year", "4th Year", "Fresh Grad"].forEach((year) => yearFilter.add(new Option(year, year)));
-  [...new Set(seedStudents.map((student) => student.courseType))].sort().forEach((course) => courseFilter.add(new Option(course, course)));
+  COURSE_FILTER_OPTIONS.forEach((course) => courseFilter.add(new Option(course, course)));
+  Object.values(adminListControls).forEach((control) => {
+    COURSE_FILTER_OPTIONS.forEach((course) => control.filter.add(new Option(course, course)));
+  });
 }
 
 function updateStats() {
@@ -111,6 +169,26 @@ function updateStats() {
   document.querySelector("#stat-pending").textContent = String(pendingStudents().length).padStart(2, "0");
   document.querySelector("#stat-projects").textContent = String(students.reduce((total, student) => total + student.projects.length, 0)).padStart(2, "0");
   document.querySelector("#stat-courses").textContent = String(courses.size).padStart(2, "0");
+}
+
+function inferCourseType(program) {
+  const value = program.toLowerCase();
+  if (value.includes("data")) return "Data Science";
+  if (value.includes("information systems") || value.includes("is")) return "Information Systems";
+  if (value.includes("information technology") || value.includes("it")) return "Information Technology";
+  if (value.includes("computer science") || value.includes("comsci") || value.includes("cs")) return "Computer Science";
+  if (value.includes("multimedia") || value.includes("media") || value.includes("film") || value.includes("design")) return "Media and Design";
+  return "Tech Courses";
+}
+
+function availabilityLabel(value) {
+  if (value === "open") return "Open to OJT";
+  if (value === "selective") return "Selective opportunities";
+  return "Not currently available";
+}
+
+function cleanText(value) {
+  return String(value || "").trim().replace(/[<>]/g, "");
 }
 
 function studentCard(student, index) {
@@ -207,40 +285,76 @@ function closeDetails() {
 
 function renderCms() {
   const pending = pendingStudents();
-  pendingList.innerHTML = pending.length
-    ? pending.map((student) => cmsItem(student, "pending")).join("")
-    : `<p class="cms-empty">No pending submissions.</p>`;
-
   const cmsPublished = allStudents();
-  publishedList.innerHTML = cmsPublished.length
-    ? cmsPublished.map((student) => cmsItem(student, "published")).join("")
-    : `<p class="cms-empty">No published profiles are currently visible.</p>`;
+  const archived = removedStudents();
+
+  renderAdminList("pending", pending, "queue", "No matching pending submissions.");
+  renderAdminList("published", cmsPublished, "published", "No matching published profiles.");
+  renderAdminList("removed", archived, "removed", "No matching archived or disapproved profiles.");
+
+  document.querySelector("#admin-pending").textContent = String(pending.filter((student) => student.status === "pending").length).padStart(2, "0");
+  document.querySelector("#admin-returned").textContent = String(pending.filter((student) => student.status === "returned").length).padStart(2, "0");
+  document.querySelector("#admin-published").textContent = String(cmsPublished.length).padStart(2, "0");
+  document.querySelector("#admin-removed").textContent = String(archived.length).padStart(2, "0");
+}
+
+function renderAdminList(type, records, mode, emptyMessage) {
+  const control = adminListControls[type];
+  const query = control.search.value.trim().toLowerCase();
+  const course = control.filter.value;
+  const filtered = records.filter((student) => {
+    const matchesCourse = course === "all" || student.courseType === course;
+    const matchesQuery = !query || JSON.stringify(student).toLowerCase().includes(query);
+    return matchesCourse && matchesQuery;
+  });
+  const expanded = adminListExpanded[type];
+  const visible = expanded ? filtered : filtered.slice(0, ADMIN_LIST_LIMIT);
+  const toggle = filtered.length > ADMIN_LIST_LIMIT
+    ? `<button class="see-more-button" type="button" data-toggle-list="${type}">${expanded ? "Show top 5" : `See more (${filtered.length - ADMIN_LIST_LIMIT})`}</button>`
+    : "";
+  control.list.innerHTML = filtered.length
+    ? `${visible.map((student) => cmsItem(student, mode)).join("")}${toggle}`
+    : `<p class="cms-empty">${emptyMessage}</p>`;
 }
 
 function cmsItem(student, mode) {
-  const approve = mode === "pending" ? `<button class="cms-button" type="button" data-approve="${student.id}">Approve</button>` : "";
+  const reviewNote = student.reviewComments ? `<p class="review-note">Comments: ${student.reviewComments}</p>` : "";
+  const approve = mode === "queue" ? `<button class="cms-button" type="button" data-approve="${student.id}">Approve</button>` : "";
+  const returnAction = mode === "queue" ? `<button class="cms-button secondary" type="button" data-return="${student.id}">Return with comments</button>` : "";
+  const restore = mode === "removed" ? `<button class="cms-button" type="button" data-restore="${student.id}">Restore</button>` : "";
+  const removeLabel = mode === "queue" ? "Disapprove" : "Archive";
   return `
     <div class="cms-item">
-      <h4>${student.name}</h4>
+      <div class="record-heading">
+        <h4>${student.name}</h4>
+        <span>${student.status}</span>
+      </div>
       <p>${student.program} / ${student.yearLevel} / ${student.courseType}<br>${student.email}</p>
+      ${reviewNote}
       <div class="cms-actions">
         ${approve}
-        <button class="cms-button secondary" type="button" data-remove="${student.id}">Remove</button>
+        ${returnAction}
+        ${restore}
+        <button class="cms-button secondary" type="button" data-edit="${student.id}">Edit</button>
+        <button class="cms-button danger" type="button" data-remove="${student.id}">${removeLabel}</button>
+        <button class="cms-button danger" type="button" data-delete="${student.id}">Delete</button>
       </div>
     </div>`;
 }
 
 function createSubmission(formData) {
-  const name = formData.get("name").trim();
+  const name = cleanText(formData.get("name"));
   const id = `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${Date.now().toString(36)}`;
-  const skills = formData.get("skills").split(",").map((skill) => skill.trim()).filter(Boolean).slice(0, 8);
+  const skills = formData.get("skills").split(",").map(cleanText).filter(Boolean).slice(0, 8);
+  const program = cleanText(formData.get("program"));
+  const courseType = inferCourseType(program);
   return {
     id,
     name,
     initials: name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase(),
-    role: `${formData.get("courseType")} Student`,
-    courseType: formData.get("courseType"),
-    program: formData.get("program").trim(),
+    role: `${courseType} Student`,
+    courseType,
+    program,
     yearLevel: formData.get("yearLevel"),
     gradYearsSince: formData.get("yearLevel") === "Fresh Grad" ? 1 : 0,
     location: "Submitted profile",
@@ -248,11 +362,12 @@ function createSubmission(formData) {
     availabilityLabel: "Open to OJT",
     featured: false,
     skills,
-    bio: formData.get("bio").trim(),
+    bio: cleanText(formData.get("bio")),
     metrics: [{ value: "Pending", label: "admin review" }, { value: skills.length, label: "submitted skills" }],
     projects: [{ code: "01", category: "Submitted portfolio", title: "Portfolio submission", summary: "Visitor-submitted profile awaiting full admin enrichment.", result: "Needs admin validation" }],
-    email: formData.get("email").trim(),
-    portfolioUrl: formData.get("portfolioUrl").trim(),
+    email: cleanText(formData.get("email")),
+    portfolioUrl: cleanText(formData.get("portfolioUrl")),
+    reviewComments: "",
     status: "pending",
     source: "visitor"
   };
@@ -268,6 +383,113 @@ function refresh() {
   updateStats();
   renderStudents();
   renderCms();
+}
+
+function isAdminRoute() {
+  return window.location.hash === "#/admin" || window.location.pathname.replace(/\/$/, "").endsWith("/admin");
+}
+
+function renderRoute() {
+  const admin = isAdminRoute();
+  publicHeader.hidden = admin;
+  publicMain.hidden = admin;
+  publicFooter.hidden = admin;
+  adminView.hidden = !admin;
+  if (admin) renderAdminAuth();
+}
+
+function renderAdminAuth() {
+  loginPanel.hidden = state.adminLoggedIn;
+  adminDashboard.hidden = !state.adminLoggedIn;
+  if (state.adminLoggedIn) refresh();
+}
+
+function resetEditor() {
+  activeEditorId = "";
+  editorTitle.textContent = "Add student profile";
+  adminForm.reset();
+  adminForm.elements.id.value = "";
+  adminForm.elements.availability.value = "open";
+  adminForm.elements.featured.value = "false";
+}
+
+function populateEditor(id) {
+  const student = findEditableStudent(id);
+  if (!student) return;
+  activeEditorId = id;
+  editorTitle.textContent = `Editing ${student.name}`;
+  adminForm.elements.id.value = student.id;
+  adminForm.elements.name.value = student.name;
+  adminForm.elements.email.value = student.email;
+  adminForm.elements.program.value = student.program;
+  adminForm.elements.courseType.value = student.courseType;
+  adminForm.elements.yearLevel.value = student.yearLevel;
+  adminForm.elements.availability.value = student.availability;
+  adminForm.elements.role.value = student.role;
+  adminForm.elements.location.value = student.location;
+  adminForm.elements.portfolioUrl.value = student.portfolioUrl && !student.portfolioUrl.startsWith("#") ? student.portfolioUrl : "";
+  adminForm.elements.featured.value = String(Boolean(student.featured));
+  adminForm.elements.skills.value = student.skills.join(", ");
+  adminForm.elements.bio.value = student.bio;
+  adminForm.elements.reviewComments.value = student.reviewComments || "";
+  adminForm.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function studentFromAdminForm(formData, existing = {}) {
+  const name = cleanText(formData.get("name"));
+  const skills = formData.get("skills").split(",").map(cleanText).filter(Boolean).slice(0, 8);
+  const availability = formData.get("availability");
+  const id = existing.id || `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${Date.now().toString(36)}`;
+  return {
+    ...existing,
+    id,
+    name,
+    initials: name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase(),
+    email: cleanText(formData.get("email")),
+    program: cleanText(formData.get("program")),
+    courseType: formData.get("courseType"),
+    yearLevel: formData.get("yearLevel"),
+    gradYearsSince: formData.get("yearLevel") === "Fresh Grad" ? existing.gradYearsSince || 1 : 0,
+    availability,
+    availabilityLabel: availabilityLabel(availability),
+    role: cleanText(formData.get("role")),
+    location: cleanText(formData.get("location")),
+    portfolioUrl: cleanText(formData.get("portfolioUrl")) || existing.portfolioUrl || `#${id}`,
+    featured: formData.get("featured") === "true",
+    skills,
+    bio: cleanText(formData.get("bio")),
+    reviewComments: cleanText(formData.get("reviewComments")),
+    metrics: existing.metrics || [{ value: "Reviewed", label: "admin curated" }, { value: skills.length, label: "core skills" }],
+    projects: existing.projects || [{ code: "01", category: formData.get("courseType"), title: "Curated portfolio record", summary: "Profile created through the admin CMS prototype.", result: "Ready for review" }],
+    status: existing.status || "published",
+    source: existing.source || "admin"
+  };
+}
+
+function saveAdminProfile(formData) {
+  const id = formData.get("id");
+  const existing = id ? findEditableStudent(id) : null;
+  const updated = studentFromAdminForm(formData, existing || {});
+  if (!id) {
+    updated.status = "published";
+    state.submissions.push(updated);
+  } else {
+    const submittedIndex = state.submissions.findIndex((student) => student.id === id);
+    if (submittedIndex >= 0) state.submissions[submittedIndex] = { ...state.submissions[submittedIndex], ...updated };
+    else state.edits[id] = updated;
+  }
+  state.removedIds = state.removedIds.filter((removedId) => removedId !== updated.id);
+  saveState();
+  resetEditor();
+  refresh();
+  showToast("Profile saved");
+}
+
+function setSubmissionStatus(id, status, comments = "") {
+  const student = state.submissions.find((item) => item.id === id);
+  if (!student) return;
+  student.status = status;
+  student.reviewComments = cleanText(comments) || student.reviewComments || "";
 }
 
 grid.addEventListener("click", (event) => {
@@ -313,26 +535,96 @@ profileForm.addEventListener("submit", (event) => {
   refresh();
 });
 
-document.querySelector("#cms").addEventListener("click", (event) => {
+adminView.addEventListener("click", (event) => {
   const approveId = event.target.dataset.approve;
+  const returnId = event.target.dataset.return;
   const removeId = event.target.dataset.remove;
+  const deleteId = event.target.dataset.delete;
+  const restoreId = event.target.dataset.restore;
+  const editId = event.target.dataset.edit;
+  const toggleList = event.target.dataset.toggleList;
+  if (toggleList) {
+    adminListExpanded[toggleList] = !adminListExpanded[toggleList];
+    renderCms();
+    return;
+  }
   if (approveId) {
-    const student = state.submissions.find((item) => item.id === approveId);
-    if (student) student.status = "published";
+    setSubmissionStatus(approveId, "published");
+    state.removedIds = state.removedIds.filter((id) => id !== approveId);
     showToast("Profile approved and published");
+  }
+  if (returnId) {
+    const comments = window.prompt("Return comments for the student:", "Please revise your portfolio details and resubmit for approval.");
+    if (comments !== null) {
+      setSubmissionStatus(returnId, "returned", comments);
+      showToast("Submission returned with comments");
+    }
   }
   if (removeId) {
     if (!state.removedIds.includes(removeId)) state.removedIds.push(removeId);
-    showToast("Profile removed from website");
+    setSubmissionStatus(removeId, "removed");
+    showToast("Profile archived or disapproved");
+  }
+  if (restoreId) {
+    state.removedIds = state.removedIds.filter((id) => id !== restoreId);
+    const student = state.submissions.find((item) => item.id === restoreId);
+    if (student) student.status = "published";
+    showToast("Profile restored");
+  }
+  if (editId) {
+    populateEditor(editId);
+  }
+  if (deleteId) {
+    const submittedIndex = state.submissions.findIndex((student) => student.id === deleteId);
+    if (submittedIndex >= 0) state.submissions.splice(submittedIndex, 1);
+    if (!state.removedIds.includes(deleteId)) state.removedIds.push(deleteId);
+    delete state.edits[deleteId];
+    if (activeEditorId === deleteId) resetEditor();
+    showToast("Profile deleted from CMS state");
   }
   saveState();
   refresh();
+});
+
+loginForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  state.adminLoggedIn = true;
+  saveState();
+  renderAdminAuth();
+  showToast("Admin session started");
+});
+
+document.querySelector("#admin-logout").addEventListener("click", () => {
+  state.adminLoggedIn = false;
+  saveState();
+  renderAdminAuth();
+});
+
+adminForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  saveAdminProfile(new FormData(adminForm));
+});
+
+document.querySelector("#editor-reset").addEventListener("click", resetEditor);
+
+Object.entries(adminListControls).forEach(([type, control]) => {
+  control.search.addEventListener("input", () => {
+    adminListExpanded[type] = false;
+    renderCms();
+  });
+  control.filter.addEventListener("change", () => {
+    adminListExpanded[type] = false;
+    renderCms();
+  });
 });
 
 detailBackdrop.addEventListener("click", closeDetails);
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeDetails();
 });
+window.addEventListener("hashchange", renderRoute);
 
 initializeFilters();
+resetEditor();
 refresh();
+renderRoute();

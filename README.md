@@ -10,7 +10,15 @@ Open `index.html` directly, or serve the directory with any static file server.
 npx serve .
 ```
 
-The prototype includes 33 sample profiles, visitor submission, admin approval/removal, filters, profile details, and a documented production database schema.
+The prototype includes 33 sample profiles, visitor submission, private admin workflow, fake admin login, add/edit/save/delete, approval, return with comments, archive/restore, filters, profile details, and a documented production database schema.
+
+Admin prototype route:
+
+```text
+index.html#/admin
+```
+
+If hosted with a rewrite to `index.html`, `/admin` also renders the admin workspace.
 
 Defense and product documentation:
 

@@ -1,7 +1,7 @@
 -- Mapua Student Portfolio Registry production database schema
 -- Target database: PostgreSQL-compatible SQL
 
-CREATE TYPE profile_status AS ENUM ('pending', 'published', 'removed');
+CREATE TYPE profile_status AS ENUM ('pending', 'returned', 'published', 'removed');
 CREATE TYPE availability_status AS ENUM ('open', 'selective', 'unavailable');
 CREATE TYPE year_level_status AS ENUM ('1st Year', '2nd Year', '3rd Year', '4th Year', 'Fresh Grad');
 
@@ -30,11 +30,13 @@ CREATE TABLE students (
   availability_label TEXT NOT NULL,
   bio TEXT NOT NULL,
   portfolio_url TEXT,
+  review_comments TEXT,
   featured BOOLEAN NOT NULL DEFAULT FALSE,
   status profile_status NOT NULL DEFAULT 'pending',
   source TEXT NOT NULL DEFAULT 'visitor',
   submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   approved_at TIMESTAMPTZ,
+  returned_at TIMESTAMPTZ,
   removed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -79,7 +81,7 @@ CREATE TABLE admin_audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   admin_user_id UUID REFERENCES admin_users(id) ON DELETE SET NULL,
   student_id UUID REFERENCES students(id) ON DELETE SET NULL,
-  action TEXT NOT NULL CHECK (action IN ('approve', 'remove', 'restore', 'edit')),
+  action TEXT NOT NULL CHECK (action IN ('add', 'approve', 'return', 'remove', 'restore', 'edit', 'delete')),
   notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
