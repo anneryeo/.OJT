@@ -99,19 +99,6 @@
             <div class="stacked-rail" id="public-year-rail"></div>
           </article>
         </div>
-        <div class="trajectory-panel public-trajectory-panel">
-          <div class="trajectory-heading">
-            <div>
-              <span class="chart-label">Career trajectory index</span>
-              <h3>Average portfolio readiness across the selected student cohort.</h3>
-              <p>This is a prototype readiness metric, not an employment claim. It estimates whether profiles are gaining the evidence recruiters need: complete profile, skills, project proof, measurable outcomes, availability, and featured review.</p>
-            </div>
-          </div>
-          <div class="trajectory-layout">
-            <div class="line-chart" id="public-trajectory-line" aria-label="Public career trajectory line chart"></div>
-            <div class="trajectory-list" id="public-trajectory-list"></div>
-          </div>
-        </div>
         <div class="top-students-panel">
           <div class="top-students-heading">
             <span class="chart-label">Featured student project row</span>
@@ -315,6 +302,16 @@
                   <h3>Average progress from submission to recruiter-ready evidence.</h3>
                   <p>Tracks the Career Trajectory Index across published, pending, returned, and archived records. Admins can see whether a selected cohort is improving and which individual submissions still need support.</p>
                 </div>
+                <label class="select-field trajectory-cohort-field">
+                  <span class="sr-only">Group trajectory chart by cohort</span>
+                  <select id="admin-trajectory-cohort">
+                    <option value="schoolYear">Group by school year</option>
+                    <option value="yearLevel">Group by year level</option>
+                    <option value="program">Group by program</option>
+                    <option value="status">Group by review status</option>
+                  </select>
+                  <svg><use href="#icon-chevron-down"></use></svg>
+                </label>
               </div>
               <div class="trajectory-layout">
                 <div class="line-chart" id="admin-trajectory-line" aria-label="Admin career trajectory line chart"></div>

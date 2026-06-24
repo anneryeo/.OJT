@@ -155,10 +155,12 @@ button.bar-row:hover, button.rail-row:hover { background: var(--paper); border-c
 
 .trajectory-panel { margin-top: 18px; background: var(--white); border: 1px solid var(--line); border-radius: 8px; padding: 20px; box-shadow: 0 10px 32px rgba(70,10,10,.08); }
 .admin-trajectory-panel { margin-bottom: 24px; }
-.trajectory-heading { margin-bottom: 16px; }
+.trajectory-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 280px); gap: 18px; align-items: start; margin-bottom: 16px; }
 .trajectory-heading .chart-label { margin-bottom: 8px; }
 .trajectory-heading h3 { margin: 0; font-size: 24px; line-height: 1.15; letter-spacing: -.025em; }
 .trajectory-heading p { max-width: 760px; margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.trajectory-cohort-field { width: 100%; min-height: 46px; border: 1px solid var(--line); border-radius: 6px; background: var(--white); }
+.trajectory-cohort-field select { font-size: 12px; padding-right: 34px; }
 .trajectory-layout { display: grid; grid-template-columns: minmax(360px, 1.35fr) minmax(260px, .9fr); gap: 18px; align-items: stretch; }
 .line-chart { min-height: 260px; border: 1px solid var(--line); border-radius: 8px; background: linear-gradient(180deg, #fff, var(--paper)); padding: 12px; overflow: hidden; }
 .line-chart svg { width: 100%; height: 100%; min-height: 230px; stroke-width: 2; }
@@ -170,10 +172,19 @@ button.bar-row:hover, button.rail-row:hover { background: var(--paper); border-c
 .trajectory-point .axis-label { fill: var(--muted); font-size: 10px; letter-spacing: .02em; }
 .trajectory-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
 .trajectory-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.trajectory-summary article { min-height: 116px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); padding: 13px; }
+.trajectory-summary button { min-height: 116px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); color: inherit; padding: 13px; text-align: left; cursor: pointer; transition: transform .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease); }
+.trajectory-summary button:hover, .trajectory-summary button.active { background: var(--gold-soft); border-color: var(--gold); transform: translateY(-2px); }
 .trajectory-summary span { display: block; color: var(--cardinal); font-size: 30px; font-weight: 900; line-height: 1; letter-spacing: -.04em; }
 .trajectory-summary strong { display: block; margin-top: 7px; color: var(--ink); font-size: 12px; text-transform: uppercase; letter-spacing: .07em; }
 .trajectory-summary p { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.trajectory-detail { border: 1px solid var(--line); border-left: 4px solid var(--cardinal); border-radius: 8px; background: var(--paper); padding: 14px; }
+.trajectory-detail span { display: block; color: var(--cardinal); font-size: 10px; text-transform: uppercase; letter-spacing: .09em; font-weight: 900; margin-bottom: 6px; }
+.trajectory-detail p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.muted-detail { border-left-color: var(--gold); }
+.cti-breakdown { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.cti-breakdown article { border: 1px solid var(--line); border-radius: 7px; background: var(--white); padding: 10px; }
+.cti-breakdown strong { display: block; color: var(--cardinal); font-size: 18px; }
+.cti-breakdown span { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; font-weight: 900; }
 .trajectory-snapshot { display: grid; gap: 10px; max-height: 360px; overflow: auto; padding-right: 4px; }
 .trajectory-card { display: grid; grid-template-columns: 54px 1fr; gap: 12px; min-width: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); padding: 14px; }
 .trajectory-score { width: 54px; height: 54px; display: grid; place-items: center; border-radius: 8px; background: var(--cardinal); color: var(--white); font-size: 21px; font-weight: 900; }
@@ -197,6 +208,9 @@ button.bar-row:hover, button.rail-row:hover { background: var(--paper); border-c
 .see-more-button { border: 1px solid var(--line); background: var(--white); color: var(--cardinal); border-radius: 5px; padding: 11px 12px; cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 900; }
 .record-heading { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
 .record-heading span { border-radius: 999px; background: var(--gold-soft); color: var(--cardinal-dark); padding: 4px 8px; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; font-weight: 900; }
+.record-cti { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; margin: 0 0 10px; }
+.record-cti strong { border-radius: 999px; background: var(--cardinal); color: var(--white); padding: 5px 8px; font-size: 10px; letter-spacing: .06em; }
+.record-cti span { color: var(--cardinal-dark); font-size: 10px; text-transform: uppercase; letter-spacing: .07em; font-weight: 900; }
 .review-note { border-left: 3px solid var(--gold); padding-left: 10px; }
 
 .admin-view { min-height: 100vh; background: #f7efe2; }
@@ -343,6 +357,8 @@ footer p { margin: 12px 0 0; color: #ffe1df; line-height: 1.6; }
   .admin-analytics-grid .analytics-card { min-height: 320px; }
   .top-students-heading { display: block; }
   .top-students-heading p { margin-top: 8px; }
+  .trajectory-heading { display: block; }
+  .trajectory-cohort-field { margin-top: 14px; max-width: 360px; }
 }
 
 @media (max-width: 760px) {
@@ -383,6 +399,7 @@ footer p { margin: 12px 0 0; color: #ffe1df; line-height: 1.6; }
   .trajectory-card { grid-template-columns: 46px 1fr; }
   .trajectory-score { width: 46px; height: 46px; font-size: 18px; }
   .trajectory-summary { grid-template-columns: 1fr; }
+  .cti-breakdown { grid-template-columns: 1fr; }
   .trajectory-snapshot { max-height: none; }
   .form-button { width: 100%; }
   footer, .admin-footer { display: block; }

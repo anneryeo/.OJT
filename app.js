@@ -146,6 +146,8 @@ const state = loadState();
 let activeEditorId = "";
 let adminInsightPage = 0;
 let adminInsightItems = [];
+let activeTrajectoryView = "average";
+let currentTrajectoryContext = { scored: [], includeStatus: true };
 const adminListExpanded = { pending: false, published: false, removed: false };
 const grid = document.querySelector("#student-grid");
 const resultCount = document.querySelector("#result-count");
@@ -160,6 +162,7 @@ const publicSchoolYearFilter = document.querySelector("#public-school-year-filte
 const publicProgramFilter = document.querySelector("#public-program-filter");
 const adminSchoolYearFilter = document.querySelector("#admin-school-year-filter");
 const adminProgramFilter = document.querySelector("#admin-program-filter");
+const adminTrajectoryCohort = document.querySelector("#admin-trajectory-cohort");
 const detailPanel = document.querySelector("#detail-panel");
 const detailBackdrop = document.querySelector("#detail-backdrop");
 const toast = document.querySelector("#toast");
@@ -199,6 +202,7 @@ const adminForm = document.querySelector("#admin-form");
 const editorTitle = document.querySelector("#editor-title");
 const adminActionPrev = document.querySelector("#admin-action-prev");
 const adminActionNext = document.querySelector("#admin-action-next");
+const adminTrajectoryList = document.querySelector("#admin-trajectory-list");
 
 function loadState() {
   try {
@@ -329,6 +333,25 @@ function trajectoryStage(score) {
   return "Early profile";
 }
 
+function trajectoryBreakdown(student) {
+  const parts = [
+    ["Base profile", 18, true],
+    ["Meaningful bio", 12, student.bio && student.bio.length > 80],
+    ["4+ skills", 12, (student.skills || []).length >= 4],
+    ["Project evidence", 16, (student.projects || []).length > 0],
+    ["Published review", 14, student.status === "published"],
+    ["Ready availability", 10, student.availability === "open"],
+    ["Selective availability", 5, student.availability === "selective"],
+    ["Featured", 10, student.featured],
+    ["Measurable outcome", 8, (student.projects || []).some((project) => /\d|%|score|rating|users|teams|responses|interviews|checks|risks|modules|templates|assets|levels/i.test(project.result || ""))]
+  ];
+  const penalties = [
+    ["Returned revision", -8, student.status === "returned"],
+    ["Archived", -20, student.status === "removed"]
+  ];
+  return [...parts, ...penalties].filter(([, , applies]) => applies);
+}
+
 function averageScore(records) {
   return records.length ? Math.round(records.reduce((sum, student) => sum + trajectoryScore(student), 0) / records.length) : 0;
 }
@@ -337,10 +360,14 @@ function shortSchoolYear(label) {
   return label.replace("AY ", "").replace(" to ", "-");
 }
 
-function trajectorySeries(records, selectedYear) {
-  const groups = selectedYear === "all"
-    ? SCHOOL_YEAR_OPTIONS.map((schoolYear) => [shortSchoolYear(schoolYear), records.filter((student) => student.schoolYear === schoolYear)])
-    : ["1st Year", "2nd Year", "3rd Year", "4th Year", "Fresh Grad"].map((yearLevel) => [yearLevel.replace(" Year", ""), records.filter((student) => student.yearLevel === yearLevel)]);
+function trajectorySeries(records, cohortMode) {
+  const groupSets = {
+    schoolYear: SCHOOL_YEAR_OPTIONS.map((schoolYear) => [shortSchoolYear(schoolYear), records.filter((student) => student.schoolYear === schoolYear)]),
+    yearLevel: ["1st Year", "2nd Year", "3rd Year", "4th Year", "Fresh Grad"].map((yearLevel) => [yearLevel === "Fresh Grad" ? "Post-grad" : yearLevel.replace(" Year", ""), records.filter((student) => student.yearLevel === yearLevel)]),
+    program: COURSE_FILTER_OPTIONS.map((course) => [course.replace("Information ", "Info ").replace("Computer ", "Comp "), records.filter((student) => student.courseType === course)]),
+    status: [["Pending", records.filter((student) => student.status === "pending")], ["Returned", records.filter((student) => student.status === "returned")], ["Published", records.filter((student) => student.status === "published")], ["Archived", records.filter((student) => student.status === "removed")]]
+  };
+  const groups = groupSets[cohortMode] || groupSets.schoolYear;
   return groups.map(([label, group]) => ({
     label,
     count: group.length,
@@ -367,35 +394,68 @@ function lineChartMarkup(series) {
 }
 
 function renderTrajectoryPanel(records, lineSelector, listSelector, options = {}) {
-  const { includeStatus = false, selectedYear = "all" } = options;
+  const { includeStatus = false, cohortMode = "schoolYear" } = options;
   const scored = records
     .map((student) => ({ ...student, trajectoryScore: trajectoryScore(student) }))
     .sort((a, b) => b.trajectoryScore - a.trajectoryScore || a.name.localeCompare(b.name));
+  currentTrajectoryContext = { scored, includeStatus };
   const avg = averageScore(records);
   const ready = scored.filter((student) => student.trajectoryScore >= 82).length;
   const support = scored.filter((student) => student.trajectoryScore < 66).length;
   const submitted = records.length;
-  document.querySelector(lineSelector).innerHTML = lineChartMarkup(trajectorySeries(records, selectedYear));
+  document.querySelector(lineSelector).innerHTML = lineChartMarkup(trajectorySeries(records, cohortMode));
   document.querySelector(listSelector).innerHTML = `
     <div class="trajectory-summary">
-      <article><span>${avg}</span><strong>Average CTI</strong><p>0-100 readiness score for the selected cohort.</p></article>
-      <article><span>${ready}</span><strong>Recruiter-ready</strong><p>Students with strong enough evidence to surface confidently.</p></article>
-      <article><span>${support}</span><strong>Need support</strong><p>Profiles that need richer evidence, review, or revisions.</p></article>
-      <article><span>${submitted}</span><strong>Profiles tracked</strong><p>All matching students/submissions in this view.</p></article>
+      <button type="button" class="${activeTrajectoryView === "average" ? "active" : ""}" data-trajectory-view="average"><span>${avg}</span><strong>Average CTI</strong><p>Click to see what CTI means and how it is calculated.</p></button>
+      <button type="button" class="${activeTrajectoryView === "ready" ? "active" : ""}" data-trajectory-view="ready"><span>${ready}</span><strong>Recruiter-ready</strong><p>Click to see who is ready and what admins can do next.</p></button>
+      <button type="button" class="${activeTrajectoryView === "support" ? "active" : ""}" data-trajectory-view="support"><span>${support}</span><strong>Need support</strong><p>Click to see which submissions need richer evidence or revision.</p></button>
+      <button type="button" class="${activeTrajectoryView === "tracked" ? "active" : ""}" data-trajectory-view="tracked"><span>${submitted}</span><strong>Profiles tracked</strong><p>Click to browse all matching records in this cohort.</p></button>
     </div>
-    <div class="trajectory-snapshot">
-      ${scored.slice(0, 6).map((student) => `
-        <article class="trajectory-card">
-          <div class="trajectory-score">${student.trajectoryScore}</div>
-          <div>
-            <strong>${student.name}</strong>
-            <p>${trajectoryStage(student.trajectoryScore)}${includeStatus ? ` / ${student.status}` : ""}</p>
-            <div class="trajectory-progress" style="--value:${student.trajectoryScore}%"><i></i></div>
-            <small>${student.schoolYear} / ${student.courseType}</small>
-          </div>
-        </article>
-      `).join("")}
-    </div>`;
+    ${trajectoryDetailMarkup(activeTrajectoryView, scored, includeStatus)}`;
+}
+
+function trajectoryStudentCard(student, includeStatus = true) {
+  return `
+    <article class="trajectory-card">
+      <div class="trajectory-score">${student.trajectoryScore}</div>
+      <div>
+        <strong>${student.name}</strong>
+        <p>${trajectoryStage(student.trajectoryScore)}${includeStatus ? ` / ${student.status}` : ""}</p>
+        <div class="trajectory-progress" style="--value:${student.trajectoryScore}%"><i></i></div>
+        <small>${student.schoolYear} / ${student.courseType}</small>
+      </div>
+    </article>`;
+}
+
+function trajectoryDetailMarkup(view, scored, includeStatus) {
+  const ready = scored.filter((student) => student.trajectoryScore >= 82);
+  const support = scored.filter((student) => student.trajectoryScore < 66).sort((a, b) => a.trajectoryScore - b.trajectoryScore);
+  const example = scored[0];
+  if (view === "ready") {
+    return `
+      <div class="trajectory-detail"><span>Recruiter-ready means</span><p>These profiles have strong evidence, reviewed publication status, relevant skills, and clear availability. Admins can feature them, include them in recruiter shortlists, or prioritize outreach.</p></div>
+      <div class="trajectory-snapshot">${(ready.length ? ready : scored.slice(0, 3)).slice(0, 6).map((student) => trajectoryStudentCard(student, includeStatus)).join("")}</div>`;
+  }
+  if (view === "support") {
+    return `
+      <div class="trajectory-detail"><span>Needs support means</span><p>These profiles need stronger project links, clearer role descriptions, measurable outcomes, skill evidence, or revision follow-up before they should be promoted.</p></div>
+      <div class="trajectory-snapshot">${(support.length ? support : scored.slice(-3)).slice(0, 6).map((student) => trajectoryStudentCard(student, includeStatus)).join("")}</div>`;
+  }
+  if (view === "tracked") {
+    return `
+      <div class="trajectory-detail"><span>Profiles tracked means</span><p>This includes every matching record after the admin filters: published profiles, pending submissions, returned revisions, and archived records.</p></div>
+      <div class="trajectory-snapshot">${scored.slice(0, 8).map((student) => trajectoryStudentCard(student, includeStatus)).join("")}</div>`;
+  }
+  const breakdown = example ? trajectoryBreakdown(example) : [];
+  return `
+    <div class="trajectory-detail">
+      <span>Average CTI formula</span>
+      <p>CTI is a 0-100 prototype readiness score. It starts with a base profile score, then adds evidence points for a meaningful bio, skills, project proof, published review, availability, featured status, and measurable outcomes. Returned or archived records subtract points.</p>
+    </div>
+    <div class="cti-breakdown">
+      ${breakdown.map(([label, value]) => `<article><strong>${value > 0 ? "+" : ""}${value}</strong><span>${label}</span></article>`).join("")}
+    </div>
+    ${example ? `<div class="trajectory-detail muted-detail"><span>Example</span><p>${example.name} scores ${example.trajectoryScore}/100: ${trajectoryStage(example.trajectoryScore)}. The cohort average is calculated by averaging all matching student CTI scores.</p></div>` : ""}`;
 }
 
 function renderPublicAnalytics() {
@@ -433,7 +493,6 @@ function renderPublicAnalytics() {
     const count = yearCounts[year] || 0;
     return `<button class="rail-row" type="button" data-year-filter="${year}" style="--value:${Math.max(6, percent(count, Math.max(1, total)))}%"><span>${year}</span><div class="rail-track"><i></i></div><strong>${count}</strong></button>`;
   }).join("");
-  renderTrajectoryPanel(records, "#public-trajectory-line", "#public-trajectory-list", { selectedYear: publicSchoolYearFilter.value });
   renderTopStudents(records);
 }
 
@@ -498,7 +557,7 @@ function openFeaturedFromAnalytics(studentId) {
 
 function renderAdminAnalytics() {
   const active = filteredByCourse(filteredBySchoolYear([...allStudents(), ...pendingStudents(), ...removedStudents()], adminSchoolYearFilter.value), adminProgramFilter.value);
-  renderTrajectoryPanel(active, "#admin-trajectory-line", "#admin-trajectory-list", { includeStatus: true, selectedYear: adminSchoolYearFilter.value });
+  renderTrajectoryPanel(active, "#admin-trajectory-line", "#admin-trajectory-list", { includeStatus: true, cohortMode: adminTrajectoryCohort.value });
   const statusCounts = countBy(active, "status");
   const funnelOrder = [
     ["pending", "Needs first review"],
@@ -719,6 +778,7 @@ function renderAdminList(type, records, mode, emptyMessage) {
 
 function cmsItem(student, mode) {
   const reviewNote = student.reviewComments ? `<p class="review-note">Comments: ${student.reviewComments}</p>` : "";
+  const cti = trajectoryScore(student);
   const approve = mode === "queue" ? `<button class="cms-button" type="button" data-approve="${student.id}">Approve</button>` : "";
   const returnAction = mode === "queue" ? `<button class="cms-button secondary" type="button" data-return="${student.id}">Return with comments</button>` : "";
   const restore = mode === "removed" ? `<button class="cms-button" type="button" data-restore="${student.id}">Restore</button>` : "";
@@ -730,6 +790,7 @@ function cmsItem(student, mode) {
         <span>${student.status}</span>
       </div>
       <p>${student.program} / ${student.schoolYear} / ${student.yearLevel} / ${student.courseType}<br>${student.email}</p>
+      <div class="record-cti"><strong>CTI ${cti}</strong><span>${trajectoryStage(cti)}</span></div>
       ${reviewNote}
       <div class="cms-actions">
         ${approve}
@@ -976,6 +1037,14 @@ publicSchoolYearFilter.addEventListener("change", renderPublicAnalytics);
 publicProgramFilter.addEventListener("change", renderPublicAnalytics);
 adminSchoolYearFilter.addEventListener("change", renderAdminAnalytics);
 adminProgramFilter.addEventListener("change", renderAdminAnalytics);
+adminTrajectoryCohort.addEventListener("change", renderAdminAnalytics);
+
+adminTrajectoryList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-trajectory-view]");
+  if (!button) return;
+  activeTrajectoryView = button.dataset.trajectoryView;
+  renderAdminAnalytics();
+});
 
 adminActionPrev.addEventListener("click", () => {
   const pageCount = Math.max(1, Math.ceil(adminInsightItems.length / 3));
