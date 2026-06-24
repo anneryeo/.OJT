@@ -157,7 +157,9 @@ const courseFilter = document.querySelector("#course-filter");
 const availabilityFilter = document.querySelector("#availability-filter");
 const sortSelect = document.querySelector("#sort-select");
 const publicSchoolYearFilter = document.querySelector("#public-school-year-filter");
+const publicProgramFilter = document.querySelector("#public-program-filter");
 const adminSchoolYearFilter = document.querySelector("#admin-school-year-filter");
+const adminProgramFilter = document.querySelector("#admin-program-filter");
 const detailPanel = document.querySelector("#detail-panel");
 const detailBackdrop = document.querySelector("#detail-backdrop");
 const toast = document.querySelector("#toast");
@@ -263,7 +265,11 @@ function initializeFilters() {
     publicSchoolYearFilter.add(new Option(schoolYear, schoolYear));
     adminSchoolYearFilter.add(new Option(schoolYear, schoolYear));
   });
-  COURSE_FILTER_OPTIONS.forEach((course) => courseFilter.add(new Option(course, course)));
+  COURSE_FILTER_OPTIONS.forEach((course) => {
+    courseFilter.add(new Option(course, course));
+    publicProgramFilter.add(new Option(course, course));
+    adminProgramFilter.add(new Option(course, course));
+  });
   Object.values(adminListControls).forEach((control) => {
     COURSE_FILTER_OPTIONS.forEach((course) => control.filter.add(new Option(course, course)));
     SCHOOL_YEAR_OPTIONS.forEach((schoolYear) => control.schoolYear.add(new Option(schoolYear, schoolYear)));
@@ -293,6 +299,10 @@ function filteredBySchoolYear(records, selectedYear) {
   return selectedYear === "all" ? records : records.filter((student) => student.schoolYear === selectedYear);
 }
 
+function filteredByCourse(records, selectedCourse) {
+  return selectedCourse === "all" ? records : records.filter((student) => student.courseType === selectedCourse);
+}
+
 function percent(value, total) {
   return total ? Math.round((value / total) * 100) : 0;
 }
@@ -319,18 +329,22 @@ function trajectoryStage(score) {
   return "Early profile";
 }
 
-function trajectorySeries(records) {
-  const stages = [
-    ["Started", (student) => Boolean(student.name && student.program)],
-    ["Skills", (student) => (student.skills || []).length >= 4],
-    ["Project", (student) => (student.projects || []).length > 0],
-    ["Reviewed", (student) => student.status === "published"],
-    ["Ready", (student) => trajectoryScore(student) >= 82]
-  ];
-  return stages.map(([label, predicate]) => ({
+function averageScore(records) {
+  return records.length ? Math.round(records.reduce((sum, student) => sum + trajectoryScore(student), 0) / records.length) : 0;
+}
+
+function shortSchoolYear(label) {
+  return label.replace("AY ", "").replace(" to ", "-");
+}
+
+function trajectorySeries(records, selectedYear) {
+  const groups = selectedYear === "all"
+    ? SCHOOL_YEAR_OPTIONS.map((schoolYear) => [shortSchoolYear(schoolYear), records.filter((student) => student.schoolYear === schoolYear)])
+    : ["1st Year", "2nd Year", "3rd Year", "4th Year", "Fresh Grad"].map((yearLevel) => [yearLevel.replace(" Year", ""), records.filter((student) => student.yearLevel === yearLevel)]);
+  return groups.map(([label, group]) => ({
     label,
-    count: records.filter(predicate).length,
-    pct: percent(records.filter(predicate).length, Math.max(1, records.length))
+    count: group.length,
+    score: averageScore(group)
   }));
 }
 
@@ -340,38 +354,52 @@ function lineChartMarkup(series) {
   const padding = 34;
   const points = series.map((item, index) => {
     const x = padding + (index * (width - padding * 2)) / Math.max(1, series.length - 1);
-    const y = height - padding - (item.pct / 100) * (height - padding * 2);
+    const y = height - padding - (item.score / 100) * (height - padding * 2);
     return { ...item, x, y };
   });
   const path = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" ");
   return `
-    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Career trajectory percentage line">
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Average career trajectory score line">
       <path class="chart-grid-line" d="M ${padding} ${height - padding} H ${width - padding}"></path>
       <path class="trajectory-path" d="${path}"></path>
-      ${points.map((point) => `<g class="trajectory-point" style="--delay:${points.indexOf(point) * 60}ms"><circle cx="${point.x}" cy="${point.y}" r="5"></circle><text x="${point.x}" y="${point.y - 12}">${point.pct}%</text><text class="axis-label" x="${point.x}" y="${height - 10}">${point.label}</text></g>`).join("")}
+      ${points.map((point) => `<g class="trajectory-point" style="--delay:${points.indexOf(point) * 60}ms"><circle cx="${point.x}" cy="${point.y}" r="5"></circle><text x="${point.x}" y="${point.y - 12}">${point.score || "-"}</text><text class="axis-label" x="${point.x}" y="${height - 10}">${point.label}</text></g>`).join("")}
     </svg>`;
 }
 
-function renderTrajectoryPanel(records, lineSelector, listSelector, includeStatus = false) {
+function renderTrajectoryPanel(records, lineSelector, listSelector, options = {}) {
+  const { includeStatus = false, selectedYear = "all" } = options;
   const scored = records
     .map((student) => ({ ...student, trajectoryScore: trajectoryScore(student) }))
     .sort((a, b) => b.trajectoryScore - a.trajectoryScore || a.name.localeCompare(b.name));
-  document.querySelector(lineSelector).innerHTML = lineChartMarkup(trajectorySeries(records));
-  document.querySelector(listSelector).innerHTML = scored.slice(0, 4).map((student) => `
-    <article class="trajectory-card">
-      <div class="trajectory-score">${student.trajectoryScore}</div>
-      <div>
-        <strong>${student.name}</strong>
-        <p>${trajectoryStage(student.trajectoryScore)}${includeStatus ? ` / ${student.status}` : ""}</p>
-        <div class="trajectory-progress" style="--value:${student.trajectoryScore}%"><i></i></div>
-        <small>${student.courseType} / ${(student.skills || []).slice(0, 2).join(" + ")}</small>
-      </div>
-    </article>
-  `).join("");
+  const avg = averageScore(records);
+  const ready = scored.filter((student) => student.trajectoryScore >= 82).length;
+  const support = scored.filter((student) => student.trajectoryScore < 66).length;
+  const submitted = records.length;
+  document.querySelector(lineSelector).innerHTML = lineChartMarkup(trajectorySeries(records, selectedYear));
+  document.querySelector(listSelector).innerHTML = `
+    <div class="trajectory-summary">
+      <article><span>${avg}</span><strong>Average CTI</strong><p>0-100 readiness score for the selected cohort.</p></article>
+      <article><span>${ready}</span><strong>Recruiter-ready</strong><p>Students with strong enough evidence to surface confidently.</p></article>
+      <article><span>${support}</span><strong>Need support</strong><p>Profiles that need richer evidence, review, or revisions.</p></article>
+      <article><span>${submitted}</span><strong>Profiles tracked</strong><p>All matching students/submissions in this view.</p></article>
+    </div>
+    <div class="trajectory-snapshot">
+      ${scored.slice(0, 6).map((student) => `
+        <article class="trajectory-card">
+          <div class="trajectory-score">${student.trajectoryScore}</div>
+          <div>
+            <strong>${student.name}</strong>
+            <p>${trajectoryStage(student.trajectoryScore)}${includeStatus ? ` / ${student.status}` : ""}</p>
+            <div class="trajectory-progress" style="--value:${student.trajectoryScore}%"><i></i></div>
+            <small>${student.schoolYear} / ${student.courseType}</small>
+          </div>
+        </article>
+      `).join("")}
+    </div>`;
 }
 
 function renderPublicAnalytics() {
-  const records = filteredBySchoolYear(allStudents(), publicSchoolYearFilter.value);
+  const records = filteredByCourse(filteredBySchoolYear(allStudents(), publicSchoolYearFilter.value), publicProgramFilter.value);
   const total = records.length;
   const readiness = countBy(records, "availability");
   const open = readiness.open || 0;
@@ -405,7 +433,7 @@ function renderPublicAnalytics() {
     const count = yearCounts[year] || 0;
     return `<button class="rail-row" type="button" data-year-filter="${year}" style="--value:${Math.max(6, percent(count, Math.max(1, total)))}%"><span>${year}</span><div class="rail-track"><i></i></div><strong>${count}</strong></button>`;
   }).join("");
-  renderTrajectoryPanel(records, "#public-trajectory-line", "#public-trajectory-list");
+  renderTrajectoryPanel(records, "#public-trajectory-line", "#public-trajectory-list", { selectedYear: publicSchoolYearFilter.value });
   renderTopStudents(records);
 }
 
@@ -469,8 +497,8 @@ function openFeaturedFromAnalytics(studentId) {
 }
 
 function renderAdminAnalytics() {
-  const active = filteredBySchoolYear([...allStudents(), ...pendingStudents(), ...removedStudents()], adminSchoolYearFilter.value);
-  renderTrajectoryPanel(active, "#admin-trajectory-line", "#admin-trajectory-list", true);
+  const active = filteredByCourse(filteredBySchoolYear([...allStudents(), ...pendingStudents(), ...removedStudents()], adminSchoolYearFilter.value), adminProgramFilter.value);
+  renderTrajectoryPanel(active, "#admin-trajectory-line", "#admin-trajectory-list", { includeStatus: true, selectedYear: adminSchoolYearFilter.value });
   const statusCounts = countBy(active, "status");
   const funnelOrder = [
     ["pending", "Needs first review"],
@@ -945,7 +973,9 @@ detailPanel.addEventListener("click", async (event) => {
 });
 
 publicSchoolYearFilter.addEventListener("change", renderPublicAnalytics);
+publicProgramFilter.addEventListener("change", renderPublicAnalytics);
 adminSchoolYearFilter.addEventListener("change", renderAdminAnalytics);
+adminProgramFilter.addEventListener("change", renderAdminAnalytics);
 
 adminActionPrev.addEventListener("click", () => {
   const pageCount = Math.max(1, Math.ceil(adminInsightItems.length / 3));

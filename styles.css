@@ -106,8 +106,9 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .form-button { width: fit-content; }
 
 .analytics-section { background: #fffdf8; border-bottom: 1px solid var(--line); }
-.analytics-toolbar { max-width: 320px; margin-bottom: 18px; border: 1px solid var(--line); background: var(--white); box-shadow: 0 8px 24px rgba(70,10,10,.08); }
+.analytics-toolbar { width: min(680px, 100%); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 18px; border: 1px solid var(--line); background: var(--white); box-shadow: 0 8px 24px rgba(70,10,10,.08); }
 .analytics-toolbar .select-field { border-right: 0; }
+.analytics-toolbar .select-field:first-child { border-right: 1px solid var(--line); }
 .analytics-value-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
 .analytics-value-row article { background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 7px; padding: 15px 16px; }
 .analytics-value-row span { display: block; margin-bottom: 5px; color: var(--cardinal); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; font-weight: 900; }
@@ -167,7 +168,13 @@ button.bar-row:hover, button.rail-row:hover { background: var(--paper); border-c
 .trajectory-point circle { fill: var(--gold); stroke: var(--cardinal-dark); stroke-width: 2; }
 .trajectory-point text { fill: var(--cardinal-dark); stroke: none; font-family: var(--display); font-size: 12px; font-weight: 900; text-anchor: middle; }
 .trajectory-point .axis-label { fill: var(--muted); font-size: 10px; letter-spacing: .02em; }
-.trajectory-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.trajectory-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.trajectory-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.trajectory-summary article { min-height: 116px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); padding: 13px; }
+.trajectory-summary span { display: block; color: var(--cardinal); font-size: 30px; font-weight: 900; line-height: 1; letter-spacing: -.04em; }
+.trajectory-summary strong { display: block; margin-top: 7px; color: var(--ink); font-size: 12px; text-transform: uppercase; letter-spacing: .07em; }
+.trajectory-summary p { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.trajectory-snapshot { display: grid; gap: 10px; max-height: 360px; overflow: auto; padding-right: 4px; }
 .trajectory-card { display: grid; grid-template-columns: 54px 1fr; gap: 12px; min-width: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); padding: 14px; }
 .trajectory-score { width: 54px; height: 54px; display: grid; place-items: center; border-radius: 8px; background: var(--cardinal); color: var(--white); font-size: 21px; font-weight: 900; }
 .trajectory-card strong { display: block; margin-bottom: 3px; color: var(--ink); font-size: 15px; line-height: 1.2; }
@@ -352,6 +359,8 @@ footer p { margin: 12px 0 0; color: #ffe1df; line-height: 1.6; }
   .admin-analytics-heading { display: block; }
   .admin-analytics-heading .select-field { min-width: 0; margin-top: 16px; }
   .toolbar { display: flex; flex-direction: column; }
+  .analytics-toolbar { grid-template-columns: 1fr; }
+  .analytics-toolbar .select-field:first-child { border-right: 0; border-bottom: 1px solid var(--line); }
   .search-field, .select-field { border-right: 0; border-bottom: 1px solid var(--line); }
   .student-grid { grid-template-columns: 1fr; }
   .hero-actions { align-items: stretch; flex-direction: column; }
@@ -373,6 +382,8 @@ footer p { margin: 12px 0 0; color: #ffe1df; line-height: 1.6; }
   .line-chart { min-height: 230px; }
   .trajectory-card { grid-template-columns: 46px 1fr; }
   .trajectory-score { width: 46px; height: 46px; font-size: 18px; }
+  .trajectory-summary { grid-template-columns: 1fr; }
+  .trajectory-snapshot { max-height: none; }
   .form-button { width: 100%; }
   footer, .admin-footer { display: block; }
   .footer-note { text-align: left; }
