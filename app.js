@@ -2,7 +2,11 @@ const icon = (name) => `<svg aria-hidden="true"><use href="#icon-${name}"></use>
 
 const STORAGE_KEY = "mapuaPortfolioRegistry";
 const ADMIN_LIST_LIMIT = 5;
-const COURSE_FILTER_OPTIONS = ["Computer Science", "Data Science", "Information Systems", "Information Technology", "Media and Design"];
+const COURSE_FILTER_OPTIONS = ["Computer Science", "Data Science", "Information Systems", "Information Technology", "Media and Design", "Tech Courses"];
+const SCHOOL_YEAR_OPTIONS = ["AY 2025 to 2026", "AY 2026 to 2027", "AY 2027 to 2028", "AY 2028 to 2029"];
+const AVAILABILITY_COLORS = { open: "#2f8f5b", selective: "#d4a017", unavailable: "#b11116" };
+const AVAILABILITY_LABELS = { open: "Open to OJT", selective: "Selective", unavailable: "Unavailable" };
+const AVAILABILITY_SHORT_LABELS = { open: "Open", selective: "Selective", unavailable: "Unavailable" };
 
 const studentSeeds = [
   ["ana-reyes", "Ana Sofia Reyes", "AS", "Data Analyst Intern", "Data Science", "BS Data Science", "3rd Year", "Makati", "open", true, ["Python", "SQL", "Power BI", "Statistics"], "Built a dashboard that reduced manual reporting time for a campus organization.", "Enrollment Insights", "Cleaned and visualized enrollment trend data.", "42% faster reporting"],
@@ -39,7 +43,7 @@ const studentSeeds = [
   ["charmaine-nolasco", "Charmaine Nolasco", "CN", "Technical Writer", "Tech Courses", "BS Computer Engineering", "1st Year", "Intramuros", "unavailable", false, ["Documentation", "Diagrams", "Hardware", "Research"], "Explains technical systems through concise guides and diagrams.", "Sensor Guide", "Documented setup instructions for sensor lab kits.", "10 guides drafted"]
 ];
 
-const seedStudents = studentSeeds.map((item) => ({
+const seedStudents = studentSeeds.map((item, index) => ({
   id: item[0],
   name: item[1],
   initials: item[2],
@@ -47,6 +51,7 @@ const seedStudents = studentSeeds.map((item) => ({
   courseType: item[4],
   program: item[5],
   yearLevel: item[6],
+  schoolYear: SCHOOL_YEAR_OPTIONS[index % SCHOOL_YEAR_OPTIONS.length],
   gradYearsSince: item[6] === "Fresh Grad" ? 1 : 0,
   location: item[7],
   availability: item[8],
@@ -70,9 +75,12 @@ const resultCount = document.querySelector("#result-count");
 const emptyState = document.querySelector("#empty-state");
 const searchInput = document.querySelector("#search-input");
 const yearFilter = document.querySelector("#year-filter");
+const schoolYearFilter = document.querySelector("#school-year-filter");
 const courseFilter = document.querySelector("#course-filter");
 const availabilityFilter = document.querySelector("#availability-filter");
 const sortSelect = document.querySelector("#sort-select");
+const publicSchoolYearFilter = document.querySelector("#public-school-year-filter");
+const adminSchoolYearFilter = document.querySelector("#admin-school-year-filter");
 const detailPanel = document.querySelector("#detail-panel");
 const detailBackdrop = document.querySelector("#detail-backdrop");
 const toast = document.querySelector("#toast");
@@ -84,16 +92,19 @@ const adminListControls = {
   pending: {
     search: document.querySelector("#pending-search"),
     filter: document.querySelector("#pending-filter"),
+    schoolYear: document.querySelector("#pending-school-year-filter"),
     list: pendingList
   },
   published: {
     search: document.querySelector("#published-search"),
     filter: document.querySelector("#published-filter"),
+    schoolYear: document.querySelector("#published-school-year-filter"),
     list: publishedList
   },
   removed: {
     search: document.querySelector("#removed-search"),
     filter: document.querySelector("#removed-filter"),
+    schoolYear: document.querySelector("#removed-school-year-filter"),
     list: removedList
   }
 };
@@ -147,7 +158,7 @@ function removedStudents() {
 }
 
 function applyEdit(student) {
-  return { ...student, ...(state.edits[student.id] || {}) };
+  return { schoolYear: SCHOOL_YEAR_OPTIONS[0], ...student, ...(state.edits[student.id] || {}) };
 }
 
 function findEditableStudent(id) {
@@ -156,9 +167,15 @@ function findEditableStudent(id) {
 
 function initializeFilters() {
   ["1st Year", "2nd Year", "3rd Year", "4th Year", "Fresh Grad"].forEach((year) => yearFilter.add(new Option(year, year)));
+  SCHOOL_YEAR_OPTIONS.forEach((schoolYear) => {
+    schoolYearFilter.add(new Option(schoolYear, schoolYear));
+    publicSchoolYearFilter.add(new Option(schoolYear, schoolYear));
+    adminSchoolYearFilter.add(new Option(schoolYear, schoolYear));
+  });
   COURSE_FILTER_OPTIONS.forEach((course) => courseFilter.add(new Option(course, course)));
   Object.values(adminListControls).forEach((control) => {
     COURSE_FILTER_OPTIONS.forEach((course) => control.filter.add(new Option(course, course)));
+    SCHOOL_YEAR_OPTIONS.forEach((schoolYear) => control.schoolYear.add(new Option(schoolYear, schoolYear)));
   });
 }
 
@@ -169,6 +186,103 @@ function updateStats() {
   document.querySelector("#stat-pending").textContent = String(pendingStudents().length).padStart(2, "0");
   document.querySelector("#stat-projects").textContent = String(students.reduce((total, student) => total + student.projects.length, 0)).padStart(2, "0");
   document.querySelector("#stat-courses").textContent = String(courses.size).padStart(2, "0");
+}
+
+function countBy(records, key) {
+  return records.reduce((acc, record) => {
+    const value = typeof key === "function" ? key(record) : record[key];
+    acc[value] = (acc[value] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function filteredBySchoolYear(records, selectedYear) {
+  return selectedYear === "all" ? records : records.filter((student) => student.schoolYear === selectedYear);
+}
+
+function percent(value, total) {
+  return total ? Math.round((value / total) * 100) : 0;
+}
+
+function renderPublicAnalytics() {
+  const records = filteredBySchoolYear(allStudents(), publicSchoolYearFilter.value);
+  const total = records.length;
+  const readiness = countBy(records, "availability");
+  const open = readiness.open || 0;
+  const selective = readiness.selective || 0;
+  const unavailable = readiness.unavailable || 0;
+  const openPct = percent(open, total);
+  const selectivePct = percent(selective, total);
+  const unavailablePct = Math.max(0, 100 - openPct - selectivePct);
+  document.querySelector("#public-readiness-donut").style.background = `conic-gradient(${AVAILABILITY_COLORS.open} 0 ${openPct}%, ${AVAILABILITY_COLORS.selective} ${openPct}% ${openPct + selectivePct}%, ${AVAILABILITY_COLORS.unavailable} ${openPct + selectivePct}% 100%)`;
+  document.querySelector("#public-readiness-donut").innerHTML = `<strong>${openPct}%</strong><span>open now</span>`;
+  document.querySelector("#public-readiness-legend").innerHTML = [
+    ["open", open, openPct],
+    ["selective", selective, selectivePct],
+    ["unavailable", unavailable, unavailablePct]
+  ].map(([key, count, pct]) => `<span><i style="background:${AVAILABILITY_COLORS[key]}"></i>${AVAILABILITY_LABELS[key]}: ${count} (${pct}%)</span>`).join("");
+
+  const courseCounts = countBy(records, "courseType");
+  const maxCourse = Math.max(1, ...Object.values(courseCounts));
+  document.querySelector("#public-course-bars").innerHTML = COURSE_FILTER_OPTIONS.map((course) => {
+    const count = courseCounts[course] || 0;
+    return `<div class="bar-row" style="--value:${percent(count, maxCourse)}%"><span>${course}</span><div><i></i></div><strong>${count}</strong></div>`;
+  }).join("");
+
+  const yearCounts = countBy(records, "yearLevel");
+  const years = ["1st Year", "2nd Year", "3rd Year", "4th Year", "Fresh Grad"];
+  document.querySelector("#public-year-rail").innerHTML = years.map((year) => {
+    const count = yearCounts[year] || 0;
+    return `<div class="rail-row" style="--value:${Math.max(6, percent(count, Math.max(1, total)))}%"><span>${year}</span><div class="rail-track"><i></i></div><strong>${count}</strong></div>`;
+  }).join("");
+}
+
+function renderAdminAnalytics() {
+  const active = filteredBySchoolYear([...allStudents(), ...pendingStudents(), ...removedStudents()], adminSchoolYearFilter.value);
+  const statusCounts = countBy(active, "status");
+  const funnelOrder = [
+    ["published", "Published"],
+    ["pending", "Pending review"],
+    ["returned", "Returned"],
+    ["removed", "Archived"]
+  ];
+  const maxStatus = Math.max(1, ...funnelOrder.map(([key]) => statusCounts[key] || 0));
+  document.querySelector("#admin-status-funnel").innerHTML = funnelOrder.map(([key, label], index) => {
+    const count = statusCounts[key] || 0;
+    const width = Math.max(18, percent(count, maxStatus) - index * 5);
+    return `<div class="funnel-row" style="--value:${width}%"><span>${label}</span><i></i><strong>${count}</strong></div>`;
+  }).join("");
+
+  const availabilityKeys = ["open", "selective", "unavailable"];
+  const heatValues = COURSE_FILTER_OPTIONS.flatMap((course) => availabilityKeys.map((availability) => active.filter((student) => student.courseType === course && student.availability === availability).length));
+  const heatMax = Math.max(1, ...heatValues);
+  document.querySelector("#admin-heatmap").innerHTML = `
+    <div class="heatmap-head"></div>${availabilityKeys.map((key) => `<div class="heatmap-head">${AVAILABILITY_SHORT_LABELS[key]}</div>`).join("")}
+    ${COURSE_FILTER_OPTIONS.map((course) => `
+      <div class="heatmap-course">${course}</div>
+      ${availabilityKeys.map((availability) => {
+        const count = active.filter((student) => student.courseType === course && student.availability === availability).length;
+        const intensity = count / heatMax;
+        return `<div class="heat-cell" style="--intensity:${intensity.toFixed(2)}"><span>${count}</span></div>`;
+      }).join("")}
+    `).join("")}`;
+
+  const skillCounts = countBy(active.flatMap((student) => student.skills || []), (skill) => skill);
+  const topSkills = Object.entries(skillCounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 10);
+  const maxSkill = Math.max(1, ...topSkills.map(([, count]) => count));
+  document.querySelector("#admin-skill-bubbles").innerHTML = topSkills.map(([skill, count], index) => {
+    return `<div class="skill-row" style="--value:${percent(count, maxSkill)}%; --delay:${index * 35}ms"><span>${skill}</span><div><i></i></div><strong>${count}</strong></div>`;
+  }).join("");
+
+  const pending = active.filter((student) => student.status === "pending").length;
+  const returned = active.filter((student) => student.status === "returned").length;
+  const featured = active.filter((student) => student.featured && student.status === "published").length;
+  const openNow = active.filter((student) => student.availability === "open" && student.status === "published").length;
+  document.querySelector("#admin-insights").innerHTML = [
+    ["Review load", `${pending} pending and ${returned} returned profile${pending + returned === 1 ? "" : "s"}.`],
+    ["Talent availability", `${openNow} published student${openNow === 1 ? "" : "s"} currently open to OJT.`],
+    ["Featured coverage", `${featured} published profile${featured === 1 ? "" : "s"} marked as featured.`]
+  ].map(([label, value]) => `<article><span>${label}</span><strong>${value}</strong></article>`).join("");
 }
 
 function inferCourseType(program) {
@@ -201,7 +315,7 @@ function studentCard(student, index) {
           ${student.featured ? `<span class="featured-label">${icon("check")} Featured</span>` : ""}
         </div>
         <div class="card-body">
-          <span class="card-kicker">${freshGrad} / ${student.courseType}</span>
+          <span class="card-kicker">${student.schoolYear} / ${freshGrad} / ${student.courseType}</span>
           <div class="card-title">
             <h3>${student.name}</h3>
             <span class="arrow-button">${icon("arrow-up-right")}</span>
@@ -220,11 +334,13 @@ function studentCard(student, index) {
 function renderStudents() {
   const query = searchInput.value.trim().toLowerCase();
   const year = yearFilter.value;
+  const schoolYear = schoolYearFilter.value;
   const course = courseFilter.value;
   const availability = availabilityFilter.value;
   const sort = sortSelect.value;
   const filtered = allStudents()
     .filter((student) => year === "all" || student.yearLevel === year)
+    .filter((student) => schoolYear === "all" || student.schoolYear === schoolYear)
     .filter((student) => course === "all" || student.courseType === course)
     .filter((student) => availability === "all" || student.availability === availability)
     .filter((student) => !query || JSON.stringify(student).toLowerCase().includes(query))
@@ -296,16 +412,19 @@ function renderCms() {
   document.querySelector("#admin-returned").textContent = String(pending.filter((student) => student.status === "returned").length).padStart(2, "0");
   document.querySelector("#admin-published").textContent = String(cmsPublished.length).padStart(2, "0");
   document.querySelector("#admin-removed").textContent = String(archived.length).padStart(2, "0");
+  renderAdminAnalytics();
 }
 
 function renderAdminList(type, records, mode, emptyMessage) {
   const control = adminListControls[type];
   const query = control.search.value.trim().toLowerCase();
   const course = control.filter.value;
+  const schoolYear = control.schoolYear.value;
   const filtered = records.filter((student) => {
     const matchesCourse = course === "all" || student.courseType === course;
+    const matchesSchoolYear = schoolYear === "all" || student.schoolYear === schoolYear;
     const matchesQuery = !query || JSON.stringify(student).toLowerCase().includes(query);
-    return matchesCourse && matchesQuery;
+    return matchesCourse && matchesSchoolYear && matchesQuery;
   });
   const expanded = adminListExpanded[type];
   const visible = expanded ? filtered : filtered.slice(0, ADMIN_LIST_LIMIT);
@@ -329,7 +448,7 @@ function cmsItem(student, mode) {
         <h4>${student.name}</h4>
         <span>${student.status}</span>
       </div>
-      <p>${student.program} / ${student.yearLevel} / ${student.courseType}<br>${student.email}</p>
+      <p>${student.program} / ${student.schoolYear} / ${student.yearLevel} / ${student.courseType}<br>${student.email}</p>
       ${reviewNote}
       <div class="cms-actions">
         ${approve}
@@ -356,6 +475,7 @@ function createSubmission(formData) {
     courseType,
     program,
     yearLevel: formData.get("yearLevel"),
+    schoolYear: formData.get("schoolYear"),
     gradYearsSince: formData.get("yearLevel") === "Fresh Grad" ? 1 : 0,
     location: "Submitted profile",
     availability: "open",
@@ -382,11 +502,30 @@ function showToast(message) {
 function refresh() {
   updateStats();
   renderStudents();
+  renderPublicAnalytics();
   renderCms();
 }
 
+function initializeMotion() {
+  const animated = document.querySelectorAll(".hero-content > *, .stats article, .about-band > *, .section-heading, .analytics-card, .submit-section, .editor-panel, .records-panel");
+  animated.forEach((element) => element.classList.add("reveal-on-scroll"));
+  if (!("IntersectionObserver" in window)) {
+    animated.forEach((element) => element.classList.add("is-visible"));
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.14, rootMargin: "0px 0px -48px 0px" });
+  animated.forEach((element) => observer.observe(element));
+}
+
 function isAdminRoute() {
-  return window.location.hash === "#/admin" || window.location.pathname.replace(/\/$/, "").endsWith("/admin");
+  return window.location.hash === "#/admin" || window.location.hash.startsWith("#admin-") || window.location.pathname.replace(/\/$/, "").endsWith("/admin");
 }
 
 function renderRoute() {
@@ -410,6 +549,7 @@ function resetEditor() {
   adminForm.reset();
   adminForm.elements.id.value = "";
   adminForm.elements.availability.value = "open";
+  adminForm.elements.schoolYear.value = SCHOOL_YEAR_OPTIONS[0];
   adminForm.elements.featured.value = "false";
 }
 
@@ -424,6 +564,7 @@ function populateEditor(id) {
   adminForm.elements.program.value = student.program;
   adminForm.elements.courseType.value = student.courseType;
   adminForm.elements.yearLevel.value = student.yearLevel;
+  adminForm.elements.schoolYear.value = student.schoolYear;
   adminForm.elements.availability.value = student.availability;
   adminForm.elements.role.value = student.role;
   adminForm.elements.location.value = student.location;
@@ -449,6 +590,7 @@ function studentFromAdminForm(formData, existing = {}) {
     program: cleanText(formData.get("program")),
     courseType: formData.get("courseType"),
     yearLevel: formData.get("yearLevel"),
+    schoolYear: formData.get("schoolYear"),
     gradYearsSince: formData.get("yearLevel") === "Fresh Grad" ? existing.gradYearsSince || 1 : 0,
     availability,
     availabilityLabel: availabilityLabel(availability),
@@ -513,13 +655,17 @@ detailPanel.addEventListener("click", async (event) => {
   }
 });
 
-[searchInput, yearFilter, courseFilter, availabilityFilter, sortSelect].forEach((control) => {
+[searchInput, yearFilter, schoolYearFilter, courseFilter, availabilityFilter, sortSelect].forEach((control) => {
   control.addEventListener(control === searchInput ? "input" : "change", renderStudents);
 });
+
+publicSchoolYearFilter.addEventListener("change", renderPublicAnalytics);
+adminSchoolYearFilter.addEventListener("change", renderAdminAnalytics);
 
 document.querySelector("#clear-filters").addEventListener("click", () => {
   searchInput.value = "";
   yearFilter.value = "all";
+  schoolYearFilter.value = "all";
   courseFilter.value = "all";
   availabilityFilter.value = "all";
   sortSelect.value = "featured";
@@ -616,6 +762,10 @@ Object.entries(adminListControls).forEach(([type, control]) => {
     adminListExpanded[type] = false;
     renderCms();
   });
+  control.schoolYear.addEventListener("change", () => {
+    adminListExpanded[type] = false;
+    renderCms();
+  });
 });
 
 detailBackdrop.addEventListener("click", closeDetails);
@@ -628,3 +778,4 @@ initializeFilters();
 resetEditor();
 refresh();
 renderRoute();
+initializeMotion();

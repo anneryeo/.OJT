@@ -31,6 +31,7 @@
         <span>Mapua Portfolio Registry</span>
       </a>
       <nav class="main-nav" aria-label="Main navigation">
+        <a href="#analytics">Analytics</a>
         <a href="#directory">Directory</a>
         <a href="#submit">Submit Profile</a>
         <a href="#about">About</a>
@@ -56,6 +57,38 @@
         <article><span id="stat-pending">00</span><p>Pending submissions</p></article>
         <article><span id="stat-projects">00</span><p>Featured projects</p></article>
         <article><span id="stat-courses">00</span><p>Course categories</p></article>
+      </section>
+
+      <section class="analytics-section" id="analytics">
+        <div class="section-heading">
+          <div>
+            <p class="section-index">00 / PUBLIC ANALYTICS</p>
+            <h2>Registry signals by school year, program mix, and OJT readiness.</h2>
+          </div>
+          <p>These public-facing charts summarize published profiles only, giving visitors a quick read on available talent without exposing admin workflow details.</p>
+        </div>
+        <div class="analytics-toolbar">
+          <label class="select-field">
+            <span class="sr-only">Filter analytics by school year</span>
+            <select id="public-school-year-filter"><option value="all">All school years</option></select>
+            <svg><use href="#icon-chevron-down"></use></svg>
+          </label>
+        </div>
+        <div class="public-analytics-grid">
+          <article class="analytics-card highlight-card">
+            <span class="chart-label">OJT readiness</span>
+            <div class="donut-chart" id="public-readiness-donut" aria-label="OJT readiness chart"></div>
+            <div class="chart-legend" id="public-readiness-legend"></div>
+          </article>
+          <article class="analytics-card">
+            <span class="chart-label">Program concentration</span>
+            <div class="bar-chart" id="public-course-bars"></div>
+          </article>
+          <article class="analytics-card">
+            <span class="chart-label">Year level pipeline</span>
+            <div class="stacked-rail" id="public-year-rail"></div>
+          </article>
+        </div>
       </section>
 
       <section class="about-band" id="about">
@@ -92,6 +125,11 @@
           <label class="select-field">
             <span class="sr-only">Filter by course type</span>
             <select id="course-filter"><option value="all">All course types</option></select>
+            <svg><use href="#icon-chevron-down"></use></svg>
+          </label>
+          <label class="select-field">
+            <span class="sr-only">Filter by school year</span>
+            <select id="school-year-filter"><option value="all">All school years</option></select>
             <svg><use href="#icon-chevron-down"></use></svg>
           </label>
           <label class="select-field">
@@ -148,6 +186,14 @@
               <option value="Fresh Grad">Fresh Grad</option>
             </select>
           </label>
+          <label>School year
+            <select name="schoolYear" required>
+              <option>AY 2025 to 2026</option>
+              <option>AY 2026 to 2027</option>
+              <option>AY 2027 to 2028</option>
+              <option>AY 2028 to 2029</option>
+            </select>
+          </label>
           <label>Portfolio URL<input name="portfolioUrl" required type="url" placeholder="https://example.com"></label>
           <label class="wide">Skills<input name="skills" required placeholder="Python, UX Research, SQL, Figma"></label>
           <label class="wide">Short bio<textarea name="bio" required maxlength="420" placeholder="Describe your strengths, focus area, and project interests."></textarea></label>
@@ -170,6 +216,7 @@
         <a class="brand" href="./"><span class="brand-mark">M</span><span>Mapua Portfolio Admin</span></a>
         <nav class="admin-nav" aria-label="Admin navigation">
           <a href="#admin-dashboard">Dashboard</a>
+          <a href="#admin-analytics">Analytics</a>
           <a href="#admin-form">Editor</a>
           <a href="#admin-records">Records</a>
         </nav>
@@ -209,6 +256,38 @@
             <article><span id="admin-removed">00</span><p>Archived</p></article>
           </div>
 
+          <section class="admin-analytics" id="admin-analytics" aria-label="Admin analytics dashboard">
+            <div class="admin-analytics-heading">
+              <div>
+                <p class="section-index">ADMIN ONLY / DETAILED ANALYTICS</p>
+                <h2>Pipeline health, course demand, and review movement.</h2>
+              </div>
+              <label class="select-field">
+                <span class="sr-only">Filter admin analytics by school year</span>
+                <select id="admin-school-year-filter"><option value="all">All school years</option></select>
+                <svg><use href="#icon-chevron-down"></use></svg>
+              </label>
+            </div>
+            <div class="admin-analytics-grid">
+              <article class="analytics-card">
+                <span class="chart-label">Publication funnel</span>
+                <div class="funnel-chart" id="admin-status-funnel"></div>
+              </article>
+              <article class="analytics-card">
+                <span class="chart-label">Course x availability heatmap</span>
+                <div class="heatmap-chart" id="admin-heatmap"></div>
+              </article>
+              <article class="analytics-card">
+                <span class="chart-label">Skill demand signals</span>
+                <div class="bubble-chart" id="admin-skill-bubbles"></div>
+              </article>
+              <article class="analytics-card insight-card">
+                <span class="chart-label">Admin insights</span>
+                <div class="insight-list" id="admin-insights"></div>
+              </article>
+            </div>
+          </section>
+
           <div class="admin-workspace">
             <section class="editor-panel">
               <h2 id="editor-title">Add student profile</h2>
@@ -234,6 +313,14 @@
                     <option>3rd Year</option>
                     <option>4th Year</option>
                     <option>Fresh Grad</option>
+                  </select>
+                </label>
+                <label>School year
+                  <select name="schoolYear" required>
+                    <option>AY 2025 to 2026</option>
+                    <option>AY 2026 to 2027</option>
+                    <option>AY 2027 to 2028</option>
+                    <option>AY 2028 to 2029</option>
                   </select>
                 </label>
                 <label>Availability
@@ -268,6 +355,7 @@
                 <div class="record-tools">
                   <input id="pending-search" type="search" placeholder="Search submissions">
                   <select id="pending-filter"><option value="all">All course types</option></select>
+                  <select id="pending-school-year-filter"><option value="all">All school years</option></select>
                 </div>
                 <div id="pending-list" class="cms-list"></div>
               </div>
@@ -276,6 +364,7 @@
                 <div class="record-tools">
                   <input id="published-search" type="search" placeholder="Search published">
                   <select id="published-filter"><option value="all">All course types</option></select>
+                  <select id="published-school-year-filter"><option value="all">All school years</option></select>
                 </div>
                 <div id="published-list" class="cms-list"></div>
               </div>
@@ -284,6 +373,7 @@
                 <div class="record-tools">
                   <input id="removed-search" type="search" placeholder="Search archived">
                   <select id="removed-filter"><option value="all">All course types</option></select>
+                  <select id="removed-school-year-filter"><option value="all">All school years</option></select>
                 </div>
                 <div id="removed-list" class="cms-list"></div>
               </div>
