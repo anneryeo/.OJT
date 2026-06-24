@@ -297,16 +297,24 @@
                 <div class="heatmap-chart" id="admin-heatmap"></div>
               </article>
               <article class="analytics-card">
-                <span class="chart-label">Skills to validate</span>
-                <p class="chart-purpose">Shows recurring skills admins should verify in portfolio evidence.</p>
+                <span class="chart-label">Skill evidence checks</span>
+                <p class="chart-purpose">Shows recurring claimed skills admins should match against projects, links, outcomes, and review notes.</p>
                 <div class="bubble-chart" id="admin-skill-bubbles"></div>
               </article>
-              <article class="analytics-card insight-card">
-                <span class="chart-label">Next admin actions</span>
-                <p class="chart-purpose">Turns dashboard counts into practical CMS decisions.</p>
-                <div class="insight-list" id="admin-insights"></div>
-              </article>
             </div>
+            <article class="analytics-card insight-card admin-action-strip">
+              <div class="action-strip-heading">
+                <div>
+                  <span class="chart-label">Next admin actions</span>
+                  <p class="chart-purpose">Turns dashboard counts into practical CMS decisions.</p>
+                </div>
+                <div class="action-strip-controls" aria-label="Admin action navigation">
+                  <button class="icon-button" id="admin-action-prev" type="button" aria-label="Previous admin actions"><svg><use href="#icon-chevron-down"></use></svg></button>
+                  <button class="icon-button" id="admin-action-next" type="button" aria-label="Next admin actions"><svg><use href="#icon-chevron-down"></use></svg></button>
+                </div>
+              </div>
+              <div class="insight-list" id="admin-insights"></div>
+            </article>
           </section>
 
           <div class="admin-workspace">

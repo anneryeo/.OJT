@@ -196,7 +196,18 @@ button.bar-row:hover, button.rail-row:hover { background: var(--paper); border-c
 .admin-decision-row article { border: 1px solid var(--line); border-left: 4px solid var(--cardinal); border-radius: 7px; background: var(--white); padding: 15px 16px; }
 .admin-decision-row span { display: block; margin-bottom: 5px; color: var(--cardinal); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; font-weight: 900; }
 .admin-decision-row strong { display: block; color: var(--ink); font-size: 14px; line-height: 1.45; }
-.admin-analytics-grid { grid-template-columns: 1fr 1.35fr 1fr 1fr; }
+.admin-analytics-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+.admin-analytics-grid .analytics-card { width: 100%; }
+.admin-analytics-grid .analytics-card { min-height: 320px; }
+.admin-action-strip { min-height: 0; margin-top: 16px; }
+.action-strip-heading { display: flex; justify-content: space-between; gap: 18px; align-items: start; margin-bottom: 12px; }
+.action-strip-heading .chart-label { margin-bottom: 8px; }
+.action-strip-heading .chart-purpose { margin-bottom: 0; }
+.action-strip-controls { display: flex; gap: 8px; }
+.action-strip-controls .icon-button { border-radius: 6px; }
+.action-strip-controls .icon-button:first-child svg { transform: rotate(90deg); }
+.action-strip-controls .icon-button:last-child svg { transform: rotate(-90deg); }
+.action-strip-controls .icon-button:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
 .chart-purpose { margin: -8px 0 16px; color: var(--muted); font-size: 12px; line-height: 1.55; }
 .funnel-row { grid-template-columns: 108px 1fr 34px; }
 .funnel-row i { height: 28px; background: linear-gradient(90deg, var(--cardinal-dark), var(--cardinal), var(--gold)); }
@@ -209,7 +220,7 @@ button.bar-row:hover, button.rail-row:hover { background: var(--paper); border-c
 .bubble-chart { align-content: start; min-height: 250px; }
 .skill-row { animation: reveal .35s both; animation-delay: var(--delay); }
 .skill-row > div { height: 16px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); overflow: hidden; }
-.insight-list { grid-template-columns: 1fr; }
+.insight-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .insight-list article { border-left: 4px solid var(--gold); background: var(--paper); padding: 13px 14px; border-radius: 5px; }
 .insight-list span { display: block; margin-bottom: 5px; color: var(--cardinal); font-size: 10px; text-transform: uppercase; letter-spacing: .09em; font-weight: 900; }
 .insight-list strong { color: var(--ink); font-size: 14px; line-height: 1.45; }
@@ -291,8 +302,11 @@ footer p { margin: 12px 0 0; color: #ffe1df; line-height: 1.6; }
   .section-heading > p, .admin-analytics-heading .select-field { margin-top: 16px; }
   .stats, .admin-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stats article:nth-child(2n) { border-right: 0; }
-  .public-analytics-grid, .admin-analytics-grid, .analytics-value-row, .admin-decision-row { grid-template-columns: 1fr; }
+  .public-analytics-grid, .admin-analytics-grid, .analytics-value-row, .admin-decision-row, .insight-list { grid-template-columns: 1fr; }
   .analytics-card { min-height: 0; }
+  .admin-analytics-grid .analytics-card { min-height: 0; }
+  .action-strip-heading { display: block; }
+  .action-strip-controls { margin-top: 12px; }
   .top-students-heading { display: block; }
   .top-students-heading p { margin-top: 8px; }
 }

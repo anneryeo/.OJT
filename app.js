@@ -144,6 +144,8 @@ const defaultPendingSubmissions = [
 
 const state = loadState();
 let activeEditorId = "";
+let adminInsightPage = 0;
+let adminInsightItems = [];
 const adminListExpanded = { pending: false, published: false, removed: false };
 const grid = document.querySelector("#student-grid");
 const resultCount = document.querySelector("#result-count");
@@ -193,6 +195,8 @@ const loginForm = document.querySelector("#login-form");
 const adminDashboard = document.querySelector("#admin-dashboard");
 const adminForm = document.querySelector("#admin-form");
 const editorTitle = document.querySelector("#editor-title");
+const adminActionPrev = document.querySelector("#admin-action-prev");
+const adminActionNext = document.querySelector("#admin-action-next");
 
 function loadState() {
   try {
@@ -436,14 +440,29 @@ function renderAdminAnalytics() {
     .map((course) => [course, active.filter((student) => student.courseType === course && student.status === "published").length])
     .sort((a, b) => b[1] - a[1])[0];
   const topSkill = topSkills[0] || ["No skills yet", 0];
-  document.querySelector("#admin-insights").innerHTML = [
+  adminInsightItems = [
     ["Review next", pending ? `${pending} submission${pending === 1 ? "" : "s"} need first-pass review before they can appear publicly.` : "No first-pass reviews waiting right now."],
     ["Follow up", returned ? `${returned} returned profile${returned === 1 ? "" : "s"} may need student reminders or clearer revision comments.` : "No returned profiles are waiting on student revisions."],
     ["Recruiter-ready pool", `${openNow} of ${published} live profile${published === 1 ? "" : "s"} are ready for OJT conversations now.`],
     ["Coverage signal", `${strongestCourse[0]} currently has the strongest published representation (${strongestCourse[1]} profile${strongestCourse[1] === 1 ? "" : "s"}).`],
     ["Evidence to check", `${topSkill[0]} appears most often (${topSkill[1]} profile${topSkill[1] === 1 ? "" : "s"}); verify project proof before featuring more students.`],
     ["Featured shelf", `${featured} live profile${featured === 1 ? "" : "s"} are marked featured for public discovery.`]
-  ].map(([label, value]) => `<article><span>${label}</span><strong>${value}</strong></article>`).join("");
+  ];
+  adminInsightPage = Math.min(adminInsightPage, Math.max(0, Math.ceil(adminInsightItems.length / 3) - 1));
+  renderAdminInsights();
+}
+
+function renderAdminInsights() {
+  const pageSize = 3;
+  const pageCount = Math.max(1, Math.ceil(adminInsightItems.length / pageSize));
+  const visible = adminInsightItems.slice(adminInsightPage * pageSize, adminInsightPage * pageSize + pageSize);
+  document.querySelector("#admin-insights").innerHTML = visible
+    .map(([label, value]) => `<article><span>${label}</span><strong>${value}</strong></article>`)
+    .join("");
+  adminActionPrev.disabled = pageCount <= 1;
+  adminActionNext.disabled = pageCount <= 1;
+  adminActionPrev.setAttribute("aria-label", `Previous admin actions, page ${adminInsightPage + 1} of ${pageCount}`);
+  adminActionNext.setAttribute("aria-label", `Next admin actions, page ${adminInsightPage + 1} of ${pageCount}`);
 }
 
 function inferCourseType(program) {
@@ -853,6 +872,18 @@ detailPanel.addEventListener("click", async (event) => {
 publicSchoolYearFilter.addEventListener("change", renderPublicAnalytics);
 adminSchoolYearFilter.addEventListener("change", renderAdminAnalytics);
 
+adminActionPrev.addEventListener("click", () => {
+  const pageCount = Math.max(1, Math.ceil(adminInsightItems.length / 3));
+  adminInsightPage = (adminInsightPage - 1 + pageCount) % pageCount;
+  renderAdminInsights();
+});
+
+adminActionNext.addEventListener("click", () => {
+  const pageCount = Math.max(1, Math.ceil(adminInsightItems.length / 3));
+  adminInsightPage = (adminInsightPage + 1) % pageCount;
+  renderAdminInsights();
+});
+
 document.querySelector("#clear-filters").addEventListener("click", () => {
   searchInput.value = "";
   yearFilter.value = "all";
@@ -880,6 +911,7 @@ adminView.addEventListener("click", (event) => {
   const restoreId = event.target.dataset.restore;
   const editId = event.target.dataset.edit;
   const toggleList = event.target.dataset.toggleList;
+  let changed = false;
   if (toggleList) {
     adminListExpanded[toggleList] = !adminListExpanded[toggleList];
     renderCms();
@@ -888,24 +920,28 @@ adminView.addEventListener("click", (event) => {
   if (approveId) {
     setSubmissionStatus(approveId, "published");
     state.removedIds = state.removedIds.filter((id) => id !== approveId);
+    changed = true;
     showToast("Profile approved and published");
   }
   if (returnId) {
     const comments = window.prompt("Return comments for the student:", "Please revise your portfolio details and resubmit for approval.");
     if (comments !== null) {
       setSubmissionStatus(returnId, "returned", comments);
+      changed = true;
       showToast("Submission returned with comments");
     }
   }
   if (removeId) {
     if (!state.removedIds.includes(removeId)) state.removedIds.push(removeId);
     setSubmissionStatus(removeId, "removed");
+    changed = true;
     showToast("Profile archived or disapproved");
   }
   if (restoreId) {
     state.removedIds = state.removedIds.filter((id) => id !== restoreId);
     const student = state.submissions.find((item) => item.id === restoreId);
     if (student) student.status = "published";
+    changed = true;
     showToast("Profile restored");
   }
   if (editId) {
@@ -917,8 +953,10 @@ adminView.addEventListener("click", (event) => {
     if (!state.removedIds.includes(deleteId)) state.removedIds.push(deleteId);
     delete state.edits[deleteId];
     if (activeEditorId === deleteId) resetEditor();
+    changed = true;
     showToast("Profile deleted from CMS state");
   }
+  if (!changed) return;
   saveState();
   refresh();
 });
