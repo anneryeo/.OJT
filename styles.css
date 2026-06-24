@@ -117,17 +117,21 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .analytics-card:hover { transform: translateY(-4px); box-shadow: 0 18px 44px rgba(70,10,10,.13); border-color: rgba(177,17,22,.24); }
 .highlight-card { display: grid; justify-items: center; align-content: start; }
 .chart-label { display: block; margin-bottom: 16px; color: var(--cardinal); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; font-weight: 900; }
-.donut-chart { width: min(188px, 58vw); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; position: relative; color: var(--cardinal-dark); box-shadow: inset 0 0 0 1px rgba(34,27,27,.08); animation: chart-pop .52s var(--ease) both; }
+.donut-chart { width: min(188px, 58vw); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; position: relative; color: var(--cardinal-dark); box-shadow: inset 0 0 0 1px rgba(34,27,27,.08); animation: chart-pop .52s var(--ease) both; cursor: pointer; transition: transform .22s var(--ease), box-shadow .22s var(--ease); }
+.donut-chart:hover { transform: scale(1.03); box-shadow: inset 0 0 0 1px rgba(34,27,27,.08), 0 14px 28px rgba(70,10,10,.12); }
 .donut-chart::before { content: ""; position: absolute; inset: 20%; border-radius: 50%; background: var(--white); box-shadow: 0 0 0 1px var(--line); }
 .donut-center { position: relative; z-index: 1; width: 48%; aspect-ratio: 1; display: grid; place-items: center; align-content: center; text-align: center; }
 .donut-center strong, .donut-center span { display: block; text-align: center; }
 .donut-center strong { font-size: 34px; line-height: 1; font-weight: 900; letter-spacing: -.05em; }
 .donut-center span { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; font-weight: 900; }
 .chart-legend { width: 100%; display: grid; gap: 7px; margin-top: 16px; color: var(--muted); font-size: 12px; font-weight: 800; }
-.chart-legend span { display: flex; align-items: center; gap: 8px; }
+.chart-legend button { width: 100%; display: flex; align-items: center; gap: 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: inherit; padding: 5px 6px; text-align: left; cursor: pointer; transition: background .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease); }
+.chart-legend button:hover { background: var(--paper); border-color: var(--line); transform: translateX(2px); }
 .chart-legend i { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; }
 .bar-chart, .stacked-rail, .funnel-chart, .insight-list, .bubble-chart { display: grid; gap: 10px; }
 .bar-row, .rail-row, .funnel-row, .skill-row { display: grid; grid-template-columns: minmax(118px, .72fr) minmax(92px, 1fr) 34px; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; font-weight: 800; min-width: 0; }
+button.bar-row, button.rail-row { width: 100%; border: 1px solid transparent; border-radius: 6px; background: transparent; padding: 6px; text-align: left; cursor: pointer; transition: background .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease); }
+button.bar-row:hover, button.rail-row:hover { background: var(--paper); border-color: var(--line); transform: translateX(2px); }
 .bar-row span, .rail-row span, .funnel-row span, .skill-row span { min-width: 0; overflow-wrap: anywhere; line-height: 1.25; }
 .bar-row > div, .rail-track { height: 11px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); overflow: hidden; }
 .bar-row i, .rail-track i, .funnel-row i, .skill-row i { display: block; width: var(--value, 0); height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--cardinal), var(--gold)); animation: grow-bar .7s var(--ease) both; }
@@ -140,7 +144,7 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .top-students-heading .chart-label { margin-bottom: 0; }
 .top-students-heading p { max-width: 520px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
 .top-student-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.top-student-card { display: grid; grid-template-columns: 48px 1fr; gap: 12px; min-width: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); padding: 14px; animation: reveal .36s both; animation-delay: var(--delay); transition: transform .22s var(--ease), box-shadow .22s var(--ease); }
+.top-student-card { display: grid; grid-template-columns: 48px 1fr; gap: 12px; min-width: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); color: inherit; padding: 14px; text-align: left; cursor: pointer; animation: reveal .36s both; animation-delay: var(--delay); transition: transform .22s var(--ease), box-shadow .22s var(--ease), border-color .22s var(--ease); }
 .top-student-card:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(70,10,10,.1); }
 .top-student-mark { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; background: var(--cardinal); color: var(--white); font-weight: 900; }
 .top-student-card span { display: block; color: var(--cardinal); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; font-weight: 900; line-height: 1.3; }

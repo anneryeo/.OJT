@@ -84,6 +84,7 @@ const adminSchoolYearFilter = document.querySelector("#admin-school-year-filter"
 const detailPanel = document.querySelector("#detail-panel");
 const detailBackdrop = document.querySelector("#detail-backdrop");
 const toast = document.querySelector("#toast");
+const analyticsSection = document.querySelector("#analytics");
 const profileForm = document.querySelector("#profile-form");
 const pendingList = document.querySelector("#pending-list");
 const publishedList = document.querySelector("#published-list");
@@ -215,25 +216,29 @@ function renderPublicAnalytics() {
   const selectivePct = percent(selective, total);
   const unavailablePct = Math.max(0, 100 - openPct - selectivePct);
   document.querySelector("#public-readiness-donut").style.background = `conic-gradient(${AVAILABILITY_COLORS.open} 0 ${openPct}%, ${AVAILABILITY_COLORS.selective} ${openPct}% ${openPct + selectivePct}%, ${AVAILABILITY_COLORS.unavailable} ${openPct + selectivePct}% 100%)`;
+  document.querySelector("#public-readiness-donut").dataset.availabilityFilter = "open";
+  document.querySelector("#public-readiness-donut").setAttribute("role", "button");
+  document.querySelector("#public-readiness-donut").setAttribute("tabindex", "0");
+  document.querySelector("#public-readiness-donut").setAttribute("title", "Show students ready for OJT");
   document.querySelector("#public-readiness-donut").innerHTML = `<div class="donut-center"><strong>${openPct}%</strong><span>ready now</span></div>`;
   document.querySelector("#public-readiness-legend").innerHTML = [
     ["open", open, openPct],
     ["selective", selective, selectivePct],
     ["unavailable", unavailable, unavailablePct]
-  ].map(([key, count, pct]) => `<span><i style="background:${AVAILABILITY_COLORS[key]}"></i>${AVAILABILITY_LABELS[key]}: ${count} (${pct}%)</span>`).join("");
+  ].map(([key, count, pct]) => `<button type="button" data-availability-filter="${key}"><i style="background:${AVAILABILITY_COLORS[key]}"></i>${AVAILABILITY_LABELS[key]}: ${count} (${pct}%)</button>`).join("");
 
   const courseCounts = countBy(records, "courseType");
   const maxCourse = Math.max(1, ...Object.values(courseCounts));
   document.querySelector("#public-course-bars").innerHTML = COURSE_FILTER_OPTIONS.map((course) => {
     const count = courseCounts[course] || 0;
-    return `<div class="bar-row" style="--value:${percent(count, maxCourse)}%"><span>${course}</span><div><i></i></div><strong>${count}</strong></div>`;
+    return `<button class="bar-row" type="button" data-course-filter="${course}" style="--value:${percent(count, maxCourse)}%"><span>${course}</span><div><i></i></div><strong>${count}</strong></button>`;
   }).join("");
 
   const yearCounts = countBy(records, "yearLevel");
   const years = ["1st Year", "2nd Year", "3rd Year", "4th Year", "Fresh Grad"];
   document.querySelector("#public-year-rail").innerHTML = years.map((year) => {
     const count = yearCounts[year] || 0;
-    return `<div class="rail-row" style="--value:${Math.max(6, percent(count, Math.max(1, total)))}%"><span>${year}</span><div class="rail-track"><i></i></div><strong>${count}</strong></div>`;
+    return `<button class="rail-row" type="button" data-year-filter="${year}" style="--value:${Math.max(6, percent(count, Math.max(1, total)))}%"><span>${year}</span><div class="rail-track"><i></i></div><strong>${count}</strong></button>`;
   }).join("");
   renderTopStudents(records);
 }
@@ -251,7 +256,7 @@ function renderTopStudents(records) {
     ? featured.map((student, index) => {
       const project = student.projects[0];
       return `
-        <article class="top-student-card" style="--delay:${index * 45}ms">
+        <button class="top-student-card" type="button" data-featured-student="${student.id}" style="--delay:${index * 45}ms">
           <div class="top-student-mark">${student.initials}</div>
           <div>
             <span>${student.schoolYear} / ${student.courseType}</span>
@@ -259,9 +264,42 @@ function renderTopStudents(records) {
             <p>${project.title}: ${project.result}</p>
             <small>${student.skills.slice(0, 3).join(" / ")}</small>
           </div>
-        </article>`;
+        </button>`;
     }).join("")
     : `<p class="cms-empty">No featured students for this school year yet.</p>`;
+}
+
+function syncPublicSchoolYearFilter() {
+  schoolYearFilter.value = publicSchoolYearFilter.value;
+}
+
+function scrollToDirectory() {
+  document.querySelector("#directory").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function applyAnalyticsShortcut({ course = "all", year = "all", availability = "all" }) {
+  searchInput.value = "";
+  syncPublicSchoolYearFilter();
+  courseFilter.value = course;
+  yearFilter.value = year;
+  availabilityFilter.value = availability;
+  sortSelect.value = "featured";
+  renderStudents();
+  scrollToDirectory();
+}
+
+function openFeaturedFromAnalytics(studentId) {
+  const student = allStudents().find((item) => item.id === studentId);
+  if (!student) return;
+  searchInput.value = "";
+  schoolYearFilter.value = student.schoolYear;
+  courseFilter.value = student.courseType;
+  yearFilter.value = student.yearLevel;
+  availabilityFilter.value = "all";
+  sortSelect.value = "featured";
+  renderStudents();
+  scrollToDirectory();
+  window.setTimeout(() => openDetails(studentId), 360);
 }
 
 function renderAdminAnalytics() {
@@ -664,6 +702,38 @@ function setSubmissionStatus(id, status, comments = "") {
 grid.addEventListener("click", (event) => {
   const button = event.target.closest("[data-student-id]");
   if (button) openDetails(button.dataset.studentId);
+});
+
+analyticsSection.addEventListener("click", (event) => {
+  const featured = event.target.closest("[data-featured-student]");
+  const availability = event.target.closest("[data-availability-filter]");
+  const course = event.target.closest("[data-course-filter]");
+  const year = event.target.closest("[data-year-filter]");
+  if (featured) {
+    openFeaturedFromAnalytics(featured.dataset.featuredStudent);
+    return;
+  }
+  if (availability) {
+    applyAnalyticsShortcut({ availability: availability.dataset.availabilityFilter });
+    showToast("Directory filtered by readiness");
+    return;
+  }
+  if (course) {
+    applyAnalyticsShortcut({ course: course.dataset.courseFilter });
+    showToast("Directory filtered by program");
+    return;
+  }
+  if (year) {
+    applyAnalyticsShortcut({ year: year.dataset.yearFilter });
+    showToast("Directory filtered by year level");
+  }
+});
+
+analyticsSection.addEventListener("keydown", (event) => {
+  if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-availability-filter]")) {
+    event.preventDefault();
+    event.target.click();
+  }
 });
 
 detailPanel.addEventListener("click", async (event) => {
