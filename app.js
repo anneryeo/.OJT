@@ -394,10 +394,10 @@ function renderAdminAnalytics() {
   const active = filteredBySchoolYear([...allStudents(), ...pendingStudents(), ...removedStudents()], adminSchoolYearFilter.value);
   const statusCounts = countBy(active, "status");
   const funnelOrder = [
-    ["published", "Published"],
-    ["pending", "Pending review"],
-    ["returned", "Returned"],
-    ["removed", "Archived"]
+    ["pending", "Needs first review"],
+    ["returned", "Waiting on revision"],
+    ["published", "Live for recruiters"],
+    ["removed", "Archived / declined"]
   ];
   const maxStatus = Math.max(1, ...funnelOrder.map(([key]) => statusCounts[key] || 0));
   document.querySelector("#admin-status-funnel").innerHTML = funnelOrder.map(([key, label], index) => {
@@ -431,10 +431,18 @@ function renderAdminAnalytics() {
   const returned = active.filter((student) => student.status === "returned").length;
   const featured = active.filter((student) => student.featured && student.status === "published").length;
   const openNow = active.filter((student) => student.availability === "open" && student.status === "published").length;
+  const published = active.filter((student) => student.status === "published").length;
+  const strongestCourse = COURSE_FILTER_OPTIONS
+    .map((course) => [course, active.filter((student) => student.courseType === course && student.status === "published").length])
+    .sort((a, b) => b[1] - a[1])[0];
+  const topSkill = topSkills[0] || ["No skills yet", 0];
   document.querySelector("#admin-insights").innerHTML = [
-    ["Review load", `${pending} pending and ${returned} returned profile${pending + returned === 1 ? "" : "s"}.`],
-    ["Talent availability", `${openNow} published student${openNow === 1 ? "" : "s"} currently open to OJT.`],
-    ["Featured coverage", `${featured} published profile${featured === 1 ? "" : "s"} marked as featured.`]
+    ["Review next", pending ? `${pending} submission${pending === 1 ? "" : "s"} need first-pass review before they can appear publicly.` : "No first-pass reviews waiting right now."],
+    ["Follow up", returned ? `${returned} returned profile${returned === 1 ? "" : "s"} may need student reminders or clearer revision comments.` : "No returned profiles are waiting on student revisions."],
+    ["Recruiter-ready pool", `${openNow} of ${published} live profile${published === 1 ? "" : "s"} are ready for OJT conversations now.`],
+    ["Coverage signal", `${strongestCourse[0]} currently has the strongest published representation (${strongestCourse[1]} profile${strongestCourse[1] === 1 ? "" : "s"}).`],
+    ["Evidence to check", `${topSkill[0]} appears most often (${topSkill[1]} profile${topSkill[1] === 1 ? "" : "s"}); verify project proof before featuring more students.`],
+    ["Featured shelf", `${featured} live profile${featured === 1 ? "" : "s"} are marked featured for public discovery.`]
   ].map(([label, value]) => `<article><span>${label}</span><strong>${value}</strong></article>`).join("");
 }
 

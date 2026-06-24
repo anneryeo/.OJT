@@ -272,7 +272,7 @@
             <div class="admin-analytics-heading">
               <div>
                 <p class="section-index">ADMIN ONLY / DETAILED ANALYTICS</p>
-                <h2>Pipeline health, course demand, and review movement.</h2>
+                <h2>What needs review, what is ready to publish, and where the portfolio pool is strongest.</h2>
               </div>
               <label class="select-field">
                 <span class="sr-only">Filter admin analytics by school year</span>
@@ -280,21 +280,30 @@
                 <svg><use href="#icon-chevron-down"></use></svg>
               </label>
             </div>
+            <div class="admin-decision-row">
+              <article><span>Review priority</span><strong>Use the queue chart to see whether profiles are stuck in pending, returned, or archived states.</strong></article>
+              <article><span>Recruiter readiness</span><strong>Use the availability mix to confirm which programs can supply students now.</strong></article>
+              <article><span>Portfolio quality</span><strong>Use skill and insight cards to spot what to feature, revise, or validate before publishing.</strong></article>
+            </div>
             <div class="admin-analytics-grid">
               <article class="analytics-card">
-                <span class="chart-label">Publication funnel</span>
+                <span class="chart-label">Review queue status</span>
+                <p class="chart-purpose">Shows where profile records sit in the admin workflow.</p>
                 <div class="funnel-chart" id="admin-status-funnel"></div>
               </article>
               <article class="analytics-card">
-                <span class="chart-label">Course x availability heatmap</span>
+                <span class="chart-label">Program readiness map</span>
+                <p class="chart-purpose">Shows which courses have students ready, selective, or unavailable.</p>
                 <div class="heatmap-chart" id="admin-heatmap"></div>
               </article>
               <article class="analytics-card">
-                <span class="chart-label">Skill demand signals</span>
+                <span class="chart-label">Skills to validate</span>
+                <p class="chart-purpose">Shows recurring skills admins should verify in portfolio evidence.</p>
                 <div class="bubble-chart" id="admin-skill-bubbles"></div>
               </article>
               <article class="analytics-card insight-card">
-                <span class="chart-label">Admin insights</span>
+                <span class="chart-label">Next admin actions</span>
+                <p class="chart-purpose">Turns dashboard counts into practical CMS decisions.</p>
                 <div class="insight-list" id="admin-insights"></div>
               </article>
             </div>
