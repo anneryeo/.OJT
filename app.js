@@ -55,7 +55,7 @@ const seedStudents = studentSeeds.map((item, index) => ({
   gradYearsSince: item[6] === "Fresh Grad" ? 1 : 0,
   location: item[7],
   availability: item[8],
-  availabilityLabel: item[8] === "open" ? "Open to OJT" : item[8] === "selective" ? "Selective opportunities" : "Not currently available",
+  availabilityLabel: AVAILABILITY_LABELS[item[8]],
   featured: item[9],
   skills: item[10],
   bio: item[11],
@@ -66,6 +66,81 @@ const seedStudents = studentSeeds.map((item, index) => ({
   status: "published",
   source: "seed"
 }));
+
+const defaultPendingSubmissions = [
+  {
+    id: "pending-janine-rivera",
+    name: "Janine Rivera",
+    initials: "JR",
+    role: "Data Science Student",
+    courseType: "Data Science",
+    program: "BS Data Science",
+    yearLevel: "3rd Year",
+    schoolYear: "AY 2026 to 2027",
+    gradYearsSince: 0,
+    location: "Submitted profile",
+    availability: "open",
+    availabilityLabel: "Ready for OJT",
+    featured: false,
+    skills: ["Python", "Excel", "Survey Analysis", "Looker Studio"],
+    bio: "Submitted an analytics portfolio focused on student survey dashboards and reporting workflows.",
+    metrics: [{ value: "Pending", label: "admin review" }, { value: 4, label: "submitted skills" }],
+    projects: [{ code: "01", category: "Submitted portfolio", title: "Student Survey Dashboard", summary: "Visitor-submitted profile awaiting admin validation.", result: "Needs project evidence review" }],
+    email: "janine-rivera@mymail.mapua.edu.ph",
+    portfolioUrl: "#pending-janine-rivera",
+    reviewComments: "",
+    status: "pending",
+    source: "demo-pending"
+  },
+  {
+    id: "pending-cedric-torres",
+    name: "Cedric Torres",
+    initials: "CT",
+    role: "Frontend Developer Student",
+    courseType: "Information Systems",
+    program: "BS Information Systems",
+    yearLevel: "2nd Year",
+    schoolYear: "AY 2025 to 2026",
+    gradYearsSince: 0,
+    location: "Submitted profile",
+    availability: "selective",
+    availabilityLabel: "Open to select roles",
+    featured: false,
+    skills: ["React", "CSS", "Wireframes", "User Testing"],
+    bio: "Submitted a portfolio for a student services interface prototype and usability test notes.",
+    metrics: [{ value: "Returned", label: "needs revision" }, { value: 4, label: "submitted skills" }],
+    projects: [{ code: "01", category: "Submitted portfolio", title: "Student Services Prototype", summary: "Returned for clearer project links and role description.", result: "Revision requested" }],
+    email: "cedric-torres@mymail.mapua.edu.ph",
+    portfolioUrl: "#pending-cedric-torres",
+    reviewComments: "Please add a working portfolio URL and clarify your role in the prototype.",
+    status: "returned",
+    source: "demo-pending"
+  },
+  {
+    id: "pending-farah-castillo",
+    name: "Farah Castillo",
+    initials: "FC",
+    role: "Cybersecurity Student",
+    courseType: "Information Technology",
+    program: "BS Information Technology",
+    yearLevel: "4th Year",
+    schoolYear: "AY 2027 to 2028",
+    gradYearsSince: 0,
+    location: "Submitted profile",
+    availability: "open",
+    availabilityLabel: "Ready for OJT",
+    featured: false,
+    skills: ["Linux", "Risk Assessment", "Networking", "Documentation"],
+    bio: "Submitted a security checklist portfolio for small organization infrastructure reviews.",
+    metrics: [{ value: "Pending", label: "admin review" }, { value: 4, label: "submitted skills" }],
+    projects: [{ code: "01", category: "Submitted portfolio", title: "Small Office Security Checklist", summary: "Visitor-submitted profile awaiting admin validation.", result: "Needs admin validation" }],
+    email: "farah-castillo@mymail.mapua.edu.ph",
+    portfolioUrl: "#pending-farah-castillo",
+    reviewComments: "",
+    status: "pending",
+    source: "demo-pending"
+  }
+];
 
 const state = loadState();
 let activeEditorId = "";
@@ -123,17 +198,28 @@ function loadState() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (parsed && Array.isArray(parsed.submissions) && Array.isArray(parsed.removedIds)) {
-      return {
+      return withDefaultPendingSubmissions({
         submissions: parsed.submissions,
         removedIds: parsed.removedIds,
         edits: parsed.edits || {},
         adminLoggedIn: Boolean(parsed.adminLoggedIn)
-      };
+      });
     }
   } catch (error) {
     console.warn("Unable to load CMS state", error);
   }
-  return { submissions: [], removedIds: [], edits: {}, adminLoggedIn: false };
+  return withDefaultPendingSubmissions({ submissions: [], removedIds: [], edits: {}, adminLoggedIn: false });
+}
+
+function withDefaultPendingSubmissions(currentState) {
+  const existingIds = new Set([...(currentState.submissions || []).map((student) => student.id), ...(currentState.removedIds || [])]);
+  const missingDefaults = defaultPendingSubmissions.filter((student) => !existingIds.has(student.id));
+  return {
+    ...currentState,
+    submissions: [...missingDefaults, ...(currentState.submissions || [])],
+    removedIds: currentState.removedIds || [],
+    edits: currentState.edits || {}
+  };
 }
 
 function saveState() {
@@ -183,9 +269,11 @@ function initializeFilters() {
 function updateStats() {
   const students = allStudents();
   const courses = new Set(students.map((student) => student.courseType));
-  document.querySelector("#stat-students").textContent = String(students.length).padStart(2, "0");
+  const readyForOjt = students.filter((student) => student.availability === "open").length;
+  const skillTags = new Set(students.flatMap((student) => student.skills));
+  document.querySelector("#stat-students").textContent = String(readyForOjt).padStart(2, "0");
   document.querySelector("#stat-pending").textContent = String(pendingStudents().length).padStart(2, "0");
-  document.querySelector("#stat-projects").textContent = String(students.reduce((total, student) => total + student.projects.length, 0)).padStart(2, "0");
+  document.querySelector("#stat-projects").textContent = String(skillTags.size).padStart(2, "0");
   document.querySelector("#stat-courses").textContent = String(courses.size).padStart(2, "0");
 }
 
@@ -361,9 +449,7 @@ function inferCourseType(program) {
 }
 
 function availabilityLabel(value) {
-  if (value === "open") return "Open to OJT";
-  if (value === "selective") return "Selective opportunities";
-  return "Not currently available";
+  return AVAILABILITY_LABELS[value] || "Not available now";
 }
 
 function cleanText(value) {
@@ -544,7 +630,7 @@ function createSubmission(formData) {
     gradYearsSince: formData.get("yearLevel") === "Fresh Grad" ? 1 : 0,
     location: "Submitted profile",
     availability: "open",
-    availabilityLabel: "Open to OJT",
+    availabilityLabel: "Ready for OJT",
     featured: false,
     skills,
     bio: cleanText(formData.get("bio")),
