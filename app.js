@@ -297,6 +297,79 @@ function percent(value, total) {
   return total ? Math.round((value / total) * 100) : 0;
 }
 
+function trajectoryScore(student) {
+  let score = 18;
+  if (student.bio && student.bio.length > 80) score += 12;
+  if ((student.skills || []).length >= 4) score += 12;
+  if ((student.projects || []).length > 0) score += 16;
+  if (student.status === "published") score += 14;
+  if (student.availability === "open") score += 10;
+  if (student.availability === "selective") score += 5;
+  if (student.featured) score += 10;
+  if ((student.projects || []).some((project) => /\d|%|score|rating|users|teams|responses|interviews|checks|risks|modules|templates|assets|levels/i.test(project.result || ""))) score += 8;
+  if (student.status === "returned") score -= 8;
+  if (student.status === "removed") score -= 20;
+  return Math.max(5, Math.min(100, score));
+}
+
+function trajectoryStage(score) {
+  if (score >= 82) return "Recruiter-ready";
+  if (score >= 66) return "Strong evidence";
+  if (score >= 48) return "Needs enrichment";
+  return "Early profile";
+}
+
+function trajectorySeries(records) {
+  const stages = [
+    ["Started", (student) => Boolean(student.name && student.program)],
+    ["Skills", (student) => (student.skills || []).length >= 4],
+    ["Project", (student) => (student.projects || []).length > 0],
+    ["Reviewed", (student) => student.status === "published"],
+    ["Ready", (student) => trajectoryScore(student) >= 82]
+  ];
+  return stages.map(([label, predicate]) => ({
+    label,
+    count: records.filter(predicate).length,
+    pct: percent(records.filter(predicate).length, Math.max(1, records.length))
+  }));
+}
+
+function lineChartMarkup(series) {
+  const width = 520;
+  const height = 210;
+  const padding = 34;
+  const points = series.map((item, index) => {
+    const x = padding + (index * (width - padding * 2)) / Math.max(1, series.length - 1);
+    const y = height - padding - (item.pct / 100) * (height - padding * 2);
+    return { ...item, x, y };
+  });
+  const path = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" ");
+  return `
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Career trajectory percentage line">
+      <path class="chart-grid-line" d="M ${padding} ${height - padding} H ${width - padding}"></path>
+      <path class="trajectory-path" d="${path}"></path>
+      ${points.map((point) => `<g class="trajectory-point" style="--delay:${points.indexOf(point) * 60}ms"><circle cx="${point.x}" cy="${point.y}" r="5"></circle><text x="${point.x}" y="${point.y - 12}">${point.pct}%</text><text class="axis-label" x="${point.x}" y="${height - 10}">${point.label}</text></g>`).join("")}
+    </svg>`;
+}
+
+function renderTrajectoryPanel(records, lineSelector, listSelector, includeStatus = false) {
+  const scored = records
+    .map((student) => ({ ...student, trajectoryScore: trajectoryScore(student) }))
+    .sort((a, b) => b.trajectoryScore - a.trajectoryScore || a.name.localeCompare(b.name));
+  document.querySelector(lineSelector).innerHTML = lineChartMarkup(trajectorySeries(records));
+  document.querySelector(listSelector).innerHTML = scored.slice(0, 4).map((student) => `
+    <article class="trajectory-card">
+      <div class="trajectory-score">${student.trajectoryScore}</div>
+      <div>
+        <strong>${student.name}</strong>
+        <p>${trajectoryStage(student.trajectoryScore)}${includeStatus ? ` / ${student.status}` : ""}</p>
+        <div class="trajectory-progress" style="--value:${student.trajectoryScore}%"><i></i></div>
+        <small>${student.courseType} / ${(student.skills || []).slice(0, 2).join(" + ")}</small>
+      </div>
+    </article>
+  `).join("");
+}
+
 function renderPublicAnalytics() {
   const records = filteredBySchoolYear(allStudents(), publicSchoolYearFilter.value);
   const total = records.length;
@@ -332,6 +405,7 @@ function renderPublicAnalytics() {
     const count = yearCounts[year] || 0;
     return `<button class="rail-row" type="button" data-year-filter="${year}" style="--value:${Math.max(6, percent(count, Math.max(1, total)))}%"><span>${year}</span><div class="rail-track"><i></i></div><strong>${count}</strong></button>`;
   }).join("");
+  renderTrajectoryPanel(records, "#public-trajectory-line", "#public-trajectory-list");
   renderTopStudents(records);
 }
 
@@ -396,6 +470,7 @@ function openFeaturedFromAnalytics(studentId) {
 
 function renderAdminAnalytics() {
   const active = filteredBySchoolYear([...allStudents(), ...pendingStudents(), ...removedStudents()], adminSchoolYearFilter.value);
+  renderTrajectoryPanel(active, "#admin-trajectory-line", "#admin-trajectory-list", true);
   const statusCounts = countBy(active, "status");
   const funnelOrder = [
     ["pending", "Needs first review"],

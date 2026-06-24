@@ -94,6 +94,19 @@
             <div class="stacked-rail" id="public-year-rail"></div>
           </article>
         </div>
+        <div class="trajectory-panel public-trajectory-panel">
+          <div class="trajectory-heading">
+            <div>
+              <span class="chart-label">Career trajectory index</span>
+              <h3>How portfolio evidence moves students toward recruiter-ready opportunities.</h3>
+              <p>This is a prototype readiness metric, not an employment claim. It scores progress from profile completeness, reviewed project evidence, availability, featured work, and outcome strength.</p>
+            </div>
+          </div>
+          <div class="trajectory-layout">
+            <div class="line-chart" id="public-trajectory-line" aria-label="Public career trajectory line chart"></div>
+            <div class="trajectory-list" id="public-trajectory-list"></div>
+          </div>
+        </div>
         <div class="top-students-panel">
           <div class="top-students-heading">
             <span class="chart-label">Featured student project row</span>
@@ -285,6 +298,19 @@
               <article><span>Recruiter readiness</span><strong>Use the availability mix to confirm which programs can supply students now.</strong></article>
               <article><span>Portfolio quality</span><strong>Use skill and insight cards to spot what to feature, revise, or validate before publishing.</strong></article>
             </div>
+            <div class="trajectory-panel admin-trajectory-panel">
+              <div class="trajectory-heading">
+                <div>
+                  <span class="chart-label">Student trajectory monitor</span>
+                  <h3>Are students moving from submitted profiles to recruiter-ready evidence?</h3>
+                  <p>Tracks the same Career Trajectory Index across published, pending, returned, and archived records so admins can see where support is needed.</p>
+                </div>
+              </div>
+              <div class="trajectory-layout">
+                <div class="line-chart" id="admin-trajectory-line" aria-label="Admin career trajectory line chart"></div>
+                <div class="trajectory-list" id="admin-trajectory-list"></div>
+              </div>
+            </div>
             <div class="admin-analytics-grid">
               <article class="analytics-card">
                 <span class="chart-label">Review queue status</span>
@@ -305,12 +331,14 @@
             <article class="analytics-card insight-card admin-action-strip">
               <div class="action-strip-heading">
                 <div>
-                  <span class="chart-label">Next admin actions</span>
+                  <div class="action-strip-title">
+                    <span class="chart-label">Next admin actions</span>
+                    <div class="action-strip-controls" aria-label="Admin action navigation">
+                      <button class="icon-button" id="admin-action-prev" type="button" aria-label="Previous admin actions"><svg><use href="#icon-chevron-down"></use></svg></button>
+                      <button class="icon-button" id="admin-action-next" type="button" aria-label="Next admin actions"><svg><use href="#icon-chevron-down"></use></svg></button>
+                    </div>
+                  </div>
                   <p class="chart-purpose">Turns dashboard counts into practical CMS decisions.</p>
-                </div>
-                <div class="action-strip-controls" aria-label="Admin action navigation">
-                  <button class="icon-button" id="admin-action-prev" type="button" aria-label="Previous admin actions"><svg><use href="#icon-chevron-down"></use></svg></button>
-                  <button class="icon-button" id="admin-action-next" type="button" aria-label="Next admin actions"><svg><use href="#icon-chevron-down"></use></svg></button>
                 </div>
               </div>
               <div class="insight-list" id="admin-insights"></div>
