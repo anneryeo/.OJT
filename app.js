@@ -5,8 +5,8 @@ const ADMIN_LIST_LIMIT = 5;
 const COURSE_FILTER_OPTIONS = ["Computer Science", "Data Science", "Information Systems", "Information Technology", "Media and Design", "Tech Courses"];
 const SCHOOL_YEAR_OPTIONS = ["AY 2025 to 2026", "AY 2026 to 2027", "AY 2027 to 2028", "AY 2028 to 2029"];
 const AVAILABILITY_COLORS = { open: "#2f8f5b", selective: "#d4a017", unavailable: "#b11116" };
-const AVAILABILITY_LABELS = { open: "Open to OJT", selective: "Selective", unavailable: "Unavailable" };
-const AVAILABILITY_SHORT_LABELS = { open: "Open", selective: "Selective", unavailable: "Unavailable" };
+const AVAILABILITY_LABELS = { open: "Ready for OJT", selective: "Open to select roles", unavailable: "Not available now" };
+const AVAILABILITY_SHORT_LABELS = { open: "Ready", selective: "Select roles", unavailable: "Unavailable" };
 
 const studentSeeds = [
   ["ana-reyes", "Ana Sofia Reyes", "AS", "Data Analyst Intern", "Data Science", "BS Data Science", "3rd Year", "Makati", "open", true, ["Python", "SQL", "Power BI", "Statistics"], "Built a dashboard that reduced manual reporting time for a campus organization.", "Enrollment Insights", "Cleaned and visualized enrollment trend data.", "42% faster reporting"],
@@ -215,7 +215,7 @@ function renderPublicAnalytics() {
   const selectivePct = percent(selective, total);
   const unavailablePct = Math.max(0, 100 - openPct - selectivePct);
   document.querySelector("#public-readiness-donut").style.background = `conic-gradient(${AVAILABILITY_COLORS.open} 0 ${openPct}%, ${AVAILABILITY_COLORS.selective} ${openPct}% ${openPct + selectivePct}%, ${AVAILABILITY_COLORS.unavailable} ${openPct + selectivePct}% 100%)`;
-  document.querySelector("#public-readiness-donut").innerHTML = `<strong>${openPct}%</strong><span>open now</span>`;
+  document.querySelector("#public-readiness-donut").innerHTML = `<div class="donut-center"><strong>${openPct}%</strong><span>ready now</span></div>`;
   document.querySelector("#public-readiness-legend").innerHTML = [
     ["open", open, openPct],
     ["selective", selective, selectivePct],
@@ -235,6 +235,33 @@ function renderPublicAnalytics() {
     const count = yearCounts[year] || 0;
     return `<div class="rail-row" style="--value:${Math.max(6, percent(count, Math.max(1, total)))}%"><span>${year}</span><div class="rail-track"><i></i></div><strong>${count}</strong></div>`;
   }).join("");
+  renderTopStudents(records);
+}
+
+function renderTopStudents(records) {
+  const featured = records
+    .filter((student) => student.featured)
+    .sort((a, b) => {
+      const aOpen = a.availability === "open" ? 1 : 0;
+      const bOpen = b.availability === "open" ? 1 : 0;
+      return bOpen - aOpen || b.skills.length - a.skills.length || a.name.localeCompare(b.name);
+    })
+    .slice(0, 4);
+  document.querySelector("#top-student-row").innerHTML = featured.length
+    ? featured.map((student, index) => {
+      const project = student.projects[0];
+      return `
+        <article class="top-student-card" style="--delay:${index * 45}ms">
+          <div class="top-student-mark">${student.initials}</div>
+          <div>
+            <span>${student.schoolYear} / ${student.courseType}</span>
+            <h3>${student.name}</h3>
+            <p>${project.title}: ${project.result}</p>
+            <small>${student.skills.slice(0, 3).join(" / ")}</small>
+          </div>
+        </article>`;
+    }).join("")
+    : `<p class="cms-empty">No featured students for this school year yet.</p>`;
 }
 
 function renderAdminAnalytics() {

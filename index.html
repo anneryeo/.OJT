@@ -63,9 +63,9 @@
         <div class="section-heading">
           <div>
             <p class="section-index">00 / PUBLIC ANALYTICS</p>
-            <h2>Registry signals by school year, program mix, and OJT readiness.</h2>
+            <h2>Hiring signals for recruiters, students, and future applicants.</h2>
           </div>
-          <p>These public-facing charts summarize published profiles only, giving visitors a quick read on available talent without exposing admin workflow details.</p>
+          <p>The public board turns portfolios into useful evidence: who is available, what programs are represented, and which student projects show the strongest outcomes.</p>
         </div>
         <div class="analytics-toolbar">
           <label class="select-field">
@@ -73,6 +73,11 @@
             <select id="public-school-year-filter"><option value="all">All school years</option></select>
             <svg><use href="#icon-chevron-down"></use></svg>
           </label>
+        </div>
+        <div class="analytics-value-row">
+          <article><span>Recruiters</span><strong>Shortlist faster by availability, course, skills, and project proof.</strong></article>
+          <article><span>Students</span><strong>See which capabilities and outcomes stand out in the talent pool.</strong></article>
+          <article><span>Aspirants</span><strong>Use featured work as a benchmark for building stronger portfolios.</strong></article>
         </div>
         <div class="public-analytics-grid">
           <article class="analytics-card highlight-card">
@@ -88,6 +93,13 @@
             <span class="chart-label">Year level pipeline</span>
             <div class="stacked-rail" id="public-year-rail"></div>
           </article>
+        </div>
+        <div class="top-students-panel">
+          <div class="top-students-heading">
+            <span class="chart-label">Featured student project row</span>
+            <p>Profiles surfaced here are featured, published, and useful as examples of portfolio-ready project evidence.</p>
+          </div>
+          <div class="top-student-row" id="top-student-row"></div>
         </div>
       </section>
 
