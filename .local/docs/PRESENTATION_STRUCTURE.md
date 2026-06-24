@@ -1,122 +1,201 @@
-# Student Portfolio Dashboard Presentation Structure
+# Project Folio Presentation Structure
+
+This deck is structured as an OJT project demo defense. The goal is to explain the context, the problem, the four project objectives, the system design, the live demo, future production work, and the final summary.
 
 ## Slide 1: Title
 
-**Title:** Mapua SOIT Student Portfolio Dashboard: Data Integration and Visualization
-**Subtitle:** OJT Project Prototype Defense
+**Title:** Project "Folio"
+
+**Subtitle:** OJT Project Demo Defense
+
 **Presenter:** Christine Julliane Reyes, 3rd Year BS Data Science Student
-**Institution:** School of Information Technology, Mapua University
 
 **Content:**
-This slide introduces the project as an academic and technical output of the 320-hour OJT deployment. It should establish that the system is a prototype dashboard for centralizing, organizing, and presenting student portfolio data.
+Keep this slide clean and direct. It introduces the project name and frames the presentation as a demo defense, not a long technical lecture.
 
 **Media Description:**
-Use a clean Mapua-inspired red, gold, and white title layout. Add a simple dashboard mockup screenshot or a cropped image of the prototype hero section.
+Use a Mapua-inspired red, gold, and white title layout. The title should be the main visual anchor.
 
-## Slide 2: Project Context
+## Slide 2: Internship Context
 
-**Title:** Project Context and Department Setting
+**Title:** Internship Context
 
 **Content:**
-The trainee was assigned to the School of Information Technology under the supervision of Ms. Renilda Layno, Program Coordinator for BS Data Science. The project was developed to support the department's need for a more structured way to present student achievements, academic standing, skills, and project history.
+This slide explains where the internship happened and why the project came up.
 
-The system aligns with Mapua University's technology-driven identity by treating student portfolio information as structured institutional data rather than scattered profile artifacts.
+Key points:
+
+- Interned at Mapua University.
+- Assigned within SOIT.
+- Simple organization flow:
+  - SOIT Dean
+  - Supervisor: Ms. Layno
+  - Intern: Christine Julliane Reyes
+- Ms. Layno suggested exploring a student portfolio dashboard.
+
+**Speaker Direction:**
+Keep this brief and conversational. The purpose is to show the watcher where the work came from before going into the actual problem.
 
 **Media Description:**
-Use a simple organizational flow graphic: Trainee → BS Data Science Program Coordinator → SOIT Dean. Keep it formal and minimal.
+Use a very simplified organizational chart:
 
-## Slide 3: Problem and Opportunity
+```text
+SOIT Dean
+   ↓
+Ms. Layno
+   ↓
+Christine Julliane Reyes, Intern
+```
 
-**Title:** Problem and Opportunity
+## Slide 3: Problem Statement
+
+**Title:** Problem Statement
+
+**Center Screen Text:**
+
+```text
+how will we let companies know better, who our top candidates are, credibly?
+```
 
 **Content:**
-Student portfolio information was previously difficult to evaluate when stored in unstructured or fragmented formats. This made it harder for faculty and administrators to assess student capability, compare project evidence, and prepare student work for external partners or accreditation-related presentations.
+This slide explains how the project was approached. The wording should stay natural and personal because it matches the presenter's speaking style and leaves room for ad lib.
 
-The opportunity was to create a clean and unified pipeline that transforms raw student profile data into a readable visual dashboard with administrative moderation.
+The core idea is that student talent should not just be listed. It should be presented with credible evidence: skills, projects, outcomes, availability, and admin-reviewed profile quality.
 
 **Media Description:**
-Show a before-and-after visual: scattered documents/spreadsheets on the left, structured dashboard/database on the right.
+Use a centered question layout with minimal supporting graphics. The question should dominate the slide.
 
 ## Slide 4: Project Objectives
 
 **Title:** Project Objectives
 
 **Content:**
-The first objective was to organize student information into a reliable structured data model that can support a future relational database. The second objective was to create a user-friendly dashboard for public discovery and academic administration. The third objective was to connect the structured data model to a working interface where profile updates can appear immediately in the prototype environment.
+Show the four project objectives:
 
-These objectives reflect the complete flow from data cleaning and schema planning to frontend visualization and administrative governance.
+1. Data structuring
+2. Dashboard interface
+3. Admin moderation
+4. Updates and iteration
+
+**Speaker Direction:**
+Explain that these objectives cover the full workflow: organizing student profile data, showing it clearly, giving admins control over publication, and making updates visible through the prototype.
 
 **Media Description:**
-Use a three-step process diagram: Data Structuring → Dashboard Interface → Admin Moderation and Updates.
+Use four equal bars, pillars, or blocks. These same four objectives should return in the summary slide.
 
 ## Slide 5: System Overview
 
 **Title:** System Overview
 
-**Content:**
-The prototype has two major user environments. The public website allows visitors to browse published student portfolios, use search and filters, open profile details, and submit their own profile for review. The private admin route allows an administrator to log in through a fake prototype login and manage records through add, edit, save, approve, return with comments, archive, restore, and delete actions.
+**Layout:**
+Divide the slide into two sides:
 
-The prototype is dependency-free and uses browser local storage to simulate session persistence and content management.
+- Public
+- Admin
 
-**Media Description:**
-Use a simple architecture diagram showing Public Interface, Admin Route, JavaScript State, Local Storage, and Future Database Schema.
+**Public Side:**
 
-## Slide 6: Public Portfolio Directory
+- Browse published student portfolios.
+- Search and filter by school year, program, year level, and availability.
+- View public analytics for hiring and discovery signals.
+- Open student profile details.
+- Submit a profile request for admin review.
 
-**Title:** Public Portfolio Directory
+**Admin Side:**
 
-**Content:**
-The public directory contains thirty-three sample student profiles. Users can search across names, programs, skills, biographies, and project evidence. They can also filter by year level, course type, and availability. Each profile card opens into a detailed student portfolio panel showing academic status, course category, role, location, skills, selected outcomes, and featured work.
-
-This demonstrates how cleaned student data can become a readable portfolio snapshot for faculty, recruiters, mentors, and institutional partners.
-
-**Media Description:**
-Use screenshots of the public directory, filter bar, profile cards, and expanded profile panel.
-
-## Slide 7: Student Submission Workflow
-
-**Title:** Student Submission Workflow
-
-**Content:**
-The submission form allows students or visitors to request publication by entering their name, email, program, year level, portfolio URL, skills, and short biography. To avoid redundant input, the prototype no longer asks for a separate course type dropdown. Instead, the system infers course classification from the program text and sends the profile into the admin queue.
-
-Submitted profiles are not immediately public. They remain pending until reviewed and approved through the private admin workspace.
+- Fake login for prototype demonstration.
+- Review pending and returned submissions.
+- Approve, edit, return with comments, archive, restore, or delete records.
+- View admin-only analytics.
+- Monitor CTI, or Career Trajectory Index, by cohort.
+- Use local storage persistence to simulate CMS updates.
 
 **Media Description:**
-Show a user flow: Submit Profile → Pending Queue → Admin Review → Published Directory or Returned with Comments.
+Use a split-screen system diagram. Keep it simple: public users on one side, admin workflow on the other.
 
-## Slide 8: Private Admin CMS
+## Slide 6: Demo
 
-**Title:** Private Admin CMS and Moderation
-
-**Content:**
-The admin CMS is accessed through the private prototype route `index.html#/admin`, or `/admin` when hosted with routing support. It includes a fake login for demonstration purposes. The CMS supports adding new student profiles, editing existing records, saving changes, approving submissions, returning submissions with comments, archiving or disapproving records, restoring archived profiles, and deleting records.
-
-The admin workspace also includes searchable and filterable categories for submission queues, published portfolios, and archived or disapproved records. Each list shows the top five records by default with an option to see more.
-
-**Media Description:**
-Use screenshots of the admin login, admin editor form, submission queue, published records, and archived records.
-
-## Slide 9: Database and Production Readiness
-
-**Title:** Database Schema and Production Path
+**Title:** Demo
 
 **Content:**
-Although the prototype runs as a static website, it is designed around a production-ready data model. The documented SQL schema includes students, skills, projects, metrics, admin users, and audit logs. This schema supports the future replacement of local storage with a real database and authenticated backend.
+This is the live product walkthrough slide. The slide should act as a transition point before leaving the deck and opening the actual website.
 
-For production, the next phase should add real authentication, server-side validation, audit logging, email verification, privacy controls, and hosted database persistence. Live synchronization with external Mapua systems such as Blackboard remains outside the scope of this initial 320-hour deployment.
+Suggested walkthrough:
+
+1. Start in the public view.
+2. Show the directory and profile details.
+3. Show public analytics and featured students.
+4. Submit a profile request.
+5. Switch to admin route: `index.html#/admin`.
+6. Show review queue, published records, and archived records.
+7. Show admin analytics and CTI monitor.
+8. Demonstrate approval, return with comments, or editing if needed.
+
+**Speaker Direction:**
+Use this slide to guide the watcher into the website itself. The slide does not need to explain everything because the demo should carry the section.
 
 **Media Description:**
-Use a database relationship diagram or simplified table map showing students connected to skills, projects, metrics, and admin audit logs.
+Use a simple "Live Demo" screen with the URL or route:
 
-## Slide 10: Conclusion and Defense Points
+```text
+Public: index.html
+Admin: index.html#/admin
+```
 
-**Title:** Conclusion and Defense Points
+## Slide 7: Future Developments
+
+**Title:** Future Developments
 
 **Content:**
-The Student Portfolio Dashboard demonstrates an end-to-end process for converting student portfolio information into a structured, searchable, and moderated dashboard. It supports public discovery, student submission, private administrative review, and future database integration.
+List production-ready features that would be needed beyond the prototype:
 
-The project addresses the original problem of fragmented student portfolio data by presenting a clearer workflow for academic administrators and a more professional publication channel for student achievements. The final prototype is defense-ready because it includes a working public interface, private admin CMS, session persistence, documented schema, user flow, architecture, and clear production limitations.
+- Add real authentication
+- Server-side validation
+- Audit logging
+- Email verification
+- Privacy controls
+- Hosted database persistence
+- Live synchronization with external Mapua systems such as Blackboard
+
+**Speaker Direction:**
+After listing these, say:
+
+```text
+basically prod ready features!
+```
+
+Then verbally explain that these require permissions from broader Mapua authorities, which would take longer than the internship timeline.
 
 **Media Description:**
-Use a final summary graphic with four pillars: Structured Data, Public Dashboard, Admin Workflow, Production Path.
+Use a future roadmap or checklist layout. Keep it practical, not overly technical.
+
+## Slide 8: Summary
+
+**Title:** Summary
+
+**Content:**
+Circle back to the four project objectives and show how the prototype completed each one.
+
+Use four bars or steps:
+
+1. Data structuring
+   - Student profiles are organized into consistent fields: identity, academic context, career context, skills, projects, metrics, status, and review comments.
+
+2. Dashboard interface
+   - Public users can browse, filter, open profiles, view public analytics, and see featured project evidence.
+   - Admins have deeper operational dashboards.
+
+3. Admin moderation
+   - Admins can approve, return with comments, edit, archive, restore, and delete records.
+   - Pending and returned submissions are kept separate from published profiles.
+
+4. Updates and iteration
+   - Visitor submissions enter the admin queue.
+   - Admin actions update the prototype state through local storage.
+   - Analytics update based on actual filtered records and admin workflow state.
+
+**Closing Point:**
+The project demonstrates how a student portfolio website can become more than a gallery. It can become a structured, moderated, and evidence-based way to help companies understand which students are credible candidates.
+
+**Media Description:**
+Use four horizontal bars, where each bar represents one objective and one completed project step.
