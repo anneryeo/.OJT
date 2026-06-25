@@ -924,6 +924,22 @@ function profileDepthMarkup(student) {
     </div>`;
 }
 
+function adminProfileDepthMarkup(student) {
+  const roles = (student.preferredRoles || []).slice(0, 3);
+  const highlights = (student.credibilityHighlights || []).slice(0, 3);
+  return `
+    <div class="admin-profile-depth">
+      <div>
+        <strong>Best-fit roles</strong>
+        <div class="admin-role-list">${roles.map((role) => `<span>${role}</span>`).join("")}</div>
+      </div>
+      <div>
+        <strong>Fast screening notes</strong>
+        <ul>${highlights.map((highlight) => `<li>${highlight}</li>`).join("")}</ul>
+      </div>
+    </div>`;
+}
+
 function studentCard(student, index) {
   const freshGrad = student.yearLevel === "Fresh Grad" ? `Fresh Grad / ${student.gradYearsSince || 1} year since graduation` : student.yearLevel;
   const evidence = evidenceSummary(student);
@@ -1088,6 +1104,7 @@ function cmsItem(student, mode) {
       <div class="record-cti"><strong>CTI ${cti}</strong><span>${trajectoryStage(cti)}</span><span>${evidence.count} evidence links</span></div>
       <div class="admin-evidence">
         <div class="screening-note"><strong>${screenStatus}</strong><span>Resume, LinkedIn, portfolio, and certification links help admins screen faster before featuring or approving.</span></div>
+        ${adminProfileDepthMarkup(student)}
         <div class="evidence-chip-list">${credentialListMarkup(student, true)}</div>
       </div>
       ${reviewNote}

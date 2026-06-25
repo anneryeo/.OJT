@@ -218,6 +218,13 @@ button.bar-row:hover, button.rail-row:hover { background: var(--paper); border-c
 .screening-note { border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 6px; background: var(--white); padding: 10px 11px; }
 .screening-note strong { display: block; color: var(--cardinal-dark); font-size: 12px; line-height: 1.35; }
 .screening-note span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.admin-profile-depth { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 8px; }
+.admin-profile-depth > div { min-width: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--white); padding: 10px; }
+.admin-profile-depth strong { display: block; margin-bottom: 7px; color: var(--cardinal); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; line-height: 1.25; }
+.admin-role-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.admin-role-list span { border: 1px solid rgba(177,17,22,.18); border-radius: 999px; background: var(--paper); color: var(--cardinal-dark); padding: 5px 7px; font-size: 9px; text-transform: uppercase; letter-spacing: .04em; font-weight: 900; }
+.admin-profile-depth ul { display: grid; gap: 5px; margin: 0; padding-left: 15px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.admin-profile-depth li::marker { color: var(--cardinal); }
 .evidence-chip-list { display: flex; flex-wrap: wrap; gap: 7px; }
 .evidence-chip { max-width: 100%; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--white); padding: 6px 8px; }
 .evidence-chip div { min-width: 0; }
