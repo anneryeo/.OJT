@@ -188,7 +188,7 @@
             <p class="section-index">02 / VISITOR SUBMISSION</p>
             <h2>Students can request publication.</h2>
           </div>
-          <p>Submissions are saved as pending records until an admin approves them in the CMS prototype.</p>
+          <p>Students can add resume, LinkedIn, certifications, and credential links themselves. New evidence stays pending until an admin approves the public portfolio.</p>
         </div>
         <form class="profile-form" id="profile-form">
           <label>Full name<input name="name" required maxlength="80" placeholder="Juan Dela Cruz"></label>
@@ -212,7 +212,10 @@
             </select>
           </label>
           <label>Portfolio URL<input name="portfolioUrl" required type="url" placeholder="https://example.com"></label>
+          <label>LinkedIn URL<input name="linkedInUrl" type="url" placeholder="https://linkedin.com/in/your-name"></label>
+          <label>Resume URL<input name="resumeUrl" type="url" placeholder="https://drive.google.com/your-resume"></label>
           <label class="wide">Skills<input name="skills" required placeholder="Python, UX Research, SQL, Figma"></label>
+          <label class="wide">Certifications and credentials<textarea name="credentials" maxlength="900" placeholder="Coursera Data Analytics | https://coursera.org/...&#10;Credly AWS Cloud Foundations | https://credly.com/...&#10;GitHub project | https://github.com/..."></textarea></label>
           <label class="wide">Short bio<textarea name="bio" required maxlength="420" placeholder="Describe your strengths, focus area, and project interests."></textarea></label>
           <button class="primary-action form-button" type="submit">Submit for admin approval <svg><use href="#icon-user-plus"></use></svg></button>
         </form>
@@ -366,7 +369,7 @@
                     <option>Information Technology</option>
                     <option>Information Systems</option>
                     <option>Data Science</option>
-                    <option>Tech Courses</option>
+                    <option>SOIT courses</option>
                     <option>Media and Design</option>
                   </select>
                 </label>
@@ -397,6 +400,8 @@
                 <label>Role title<input name="role" required maxlength="90"></label>
                 <label>Location<input name="location" required maxlength="80"></label>
                 <label>Portfolio URL<input name="portfolioUrl" type="url" placeholder="https://example.com"></label>
+                <label>LinkedIn URL<input name="linkedInUrl" type="url" placeholder="https://linkedin.com/in/student"></label>
+                <label>Resume URL<input name="resumeUrl" type="url" placeholder="https://drive.google.com/resume"></label>
                 <label>Featured
                   <select name="featured">
                     <option value="false">No</option>
@@ -404,6 +409,7 @@
                   </select>
                 </label>
                 <label class="wide">Skills<input name="skills" required placeholder="Python, SQL, Figma"></label>
+                <label class="wide">Certifications and credentials<textarea name="credentials" maxlength="1200" placeholder="Name | URL | Issuer&#10;Coursera Data Analytics | https://coursera.org/... | Coursera"></textarea></label>
                 <label class="wide">Bio<textarea name="bio" required maxlength="480"></textarea></label>
                 <label class="wide">Review comments<textarea name="reviewComments" placeholder="Comments shown internally when returning a submission."></textarea></label>
                 <div class="editor-actions">
