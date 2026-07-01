@@ -307,6 +307,23 @@ button.bar-row:hover, button.rail-row:hover { background: var(--paper); border-c
 .admin-footer { padding: 26px clamp(18px, 4vw, 54px); background: var(--cardinal-dark); color: var(--white); display: flex; justify-content: space-between; gap: 18px; align-items: center; }
 .admin-footer p { margin: 0; color: #ffe1df; line-height: 1.6; }
 
+.account-panel { margin-top: 30px; }
+.account-panel code { background: var(--gold-soft); border-radius: 4px; padding: 1px 6px; font-size: .92em; }
+.account-grid { display: grid; grid-template-columns: minmax(240px, 320px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.account-card { background: var(--white); border: 1px solid var(--line); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+.account-card h3 { margin: 0 0 12px; color: var(--cardinal); }
+.account-current-email { margin: 0; font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--ink); word-break: break-all; }
+.account-hint { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.account-form { display: grid; gap: 14px; }
+.account-form label { display: grid; gap: 7px; color: var(--cardinal-dark); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+.account-form input { width: 100%; border: 1px solid var(--line); border-radius: 5px; padding: 12px; background: var(--white); color: var(--ink); text-transform: none; letter-spacing: 0; font-weight: 600; }
+.form-error, .form-success { margin: 0; border-radius: 6px; padding: 10px 12px; font-size: 12.5px; font-weight: 700; line-height: 1.5; }
+.form-error { background: #fdeceb; border: 1px solid var(--cardinal); color: var(--cardinal-dark); }
+.form-success { background: #eaf6ee; border: 1px solid #2f8f5b; color: #1e6b3f; }
+@media (max-width: 760px) {
+  .account-grid { grid-template-columns: 1fr; }
+}
+
 footer { padding: 36px clamp(18px, 5vw, 82px); background: var(--cardinal-dark); color: var(--white); display: flex; justify-content: space-between; gap: 24px; align-items: end; }
 footer p { margin: 12px 0 0; color: #ffe1df; line-height: 1.6; }
 .footer-note { text-align: right; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; font-weight: 800; }

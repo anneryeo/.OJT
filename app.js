@@ -1,6 +1,8 @@
 const icon = (name) => `<svg aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
 
 const STORAGE_KEY = "mapuaPortfolioRegistry";
+const DEFAULT_ADMIN_EMAIL = "coordinator@email.com";
+const DEFAULT_ADMIN_PASSWORD = "mapua_foliocoordinator2026";
 const ADMIN_LIST_LIMIT = 5;
 const COURSE_FILTER_OPTIONS = ["Computer Science", "Data Science", "Information Systems", "Information Technology", "Media and Design", "SOIT courses"];
 const SCHOOL_YEAR_OPTIONS = ["AY 2025 to 2026", "AY 2026 to 2027", "AY 2027 to 2028", "AY 2028 to 2029"];
@@ -212,6 +214,11 @@ const publicMain = document.querySelector("#top");
 const publicFooter = document.querySelector("#credits");
 const loginPanel = document.querySelector("#login-panel");
 const loginForm = document.querySelector("#login-form");
+const loginError = document.querySelector("#login-error");
+const accountForm = document.querySelector("#account-form");
+const accountError = document.querySelector("#account-error");
+const accountSuccess = document.querySelector("#account-success");
+const accountCurrentEmail = document.querySelector("#account-current-email");
 const adminDashboard = document.querySelector("#admin-dashboard");
 const adminForm = document.querySelector("#admin-form");
 const editorTitle = document.querySelector("#editor-title");
@@ -227,13 +234,34 @@ function loadState() {
         submissions: parsed.submissions,
         removedIds: parsed.removedIds,
         edits: parsed.edits || {},
-        adminLoggedIn: Boolean(parsed.adminLoggedIn)
+        adminLoggedIn: Boolean(parsed.adminLoggedIn),
+        adminAuth: parsed.adminAuth || null
       });
     }
   } catch (error) {
     console.warn("Unable to load CMS state", error);
   }
-  return withDefaultPendingSubmissions({ submissions: [], removedIds: [], edits: {}, adminLoggedIn: false });
+  return withDefaultPendingSubmissions({ submissions: [], removedIds: [], edits: {}, adminLoggedIn: false, adminAuth: null });
+}
+
+async function sha256Hex(text) {
+  if (window.crypto && window.crypto.subtle) {
+    const bytes = new TextEncoder().encode(text);
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i += 1) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return `fallback-${(hash >>> 0).toString(16)}`;
+}
+
+async function ensureAdminAuth() {
+  if (state.adminAuth && state.adminAuth.passwordHash) return;
+  state.adminAuth = { email: DEFAULT_ADMIN_EMAIL, passwordHash: await sha256Hex(DEFAULT_ADMIN_PASSWORD) };
+  saveState();
 }
 
 function withDefaultPendingSubmissions(currentState) {
@@ -1214,7 +1242,20 @@ function renderRoute() {
 function renderAdminAuth() {
   loginPanel.hidden = state.adminLoggedIn;
   adminDashboard.hidden = !state.adminLoggedIn;
-  if (state.adminLoggedIn) refresh();
+  if (state.adminLoggedIn) {
+    accountCurrentEmail.textContent = state.adminAuth ? state.adminAuth.email : DEFAULT_ADMIN_EMAIL;
+    refresh();
+  }
+}
+
+function showFormMessage(element, message) {
+  if (!message) {
+    element.hidden = true;
+    element.textContent = "";
+    return;
+  }
+  element.textContent = message;
+  element.hidden = false;
 }
 
 function resetEditor() {
@@ -1478,10 +1519,23 @@ adminView.addEventListener("click", (event) => {
   refresh();
 });
 
-loginForm.addEventListener("submit", (event) => {
+loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  showFormMessage(loginError, "");
+  const formData = new FormData(loginForm);
+  const email = cleanText(formData.get("email")).toLowerCase();
+  const password = formData.get("password");
+  await ensureAdminAuth();
+  const enteredHash = await sha256Hex(password);
+  const validEmail = state.adminAuth.email.toLowerCase() === email;
+  const validPassword = state.adminAuth.passwordHash === enteredHash;
+  if (!validEmail || !validPassword) {
+    showFormMessage(loginError, "Incorrect email or password. Check ADMIN-HANDOFF.md if you need to recover access.");
+    return;
+  }
   state.adminLoggedIn = true;
   saveState();
+  loginForm.reset();
   renderAdminAuth();
   showToast("Admin session started");
 });
@@ -1490,6 +1544,42 @@ document.querySelector("#admin-logout").addEventListener("click", () => {
   state.adminLoggedIn = false;
   saveState();
   renderAdminAuth();
+});
+
+accountForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  showFormMessage(accountError, "");
+  showFormMessage(accountSuccess, "");
+  const formData = new FormData(accountForm);
+  const currentPassword = formData.get("currentPassword");
+  const newEmail = cleanText(formData.get("newEmail"));
+  const newPassword = formData.get("newPassword");
+  const confirmPassword = formData.get("confirmPassword");
+
+  const currentHash = await sha256Hex(currentPassword);
+  if (currentHash !== state.adminAuth.passwordHash) {
+    showFormMessage(accountError, "Current password is incorrect.");
+    return;
+  }
+  if (!/^\S+@\S+\.\S+$/.test(newEmail)) {
+    showFormMessage(accountError, "Enter a valid email address.");
+    return;
+  }
+  if (newPassword.length < 10) {
+    showFormMessage(accountError, "New password must be at least 10 characters.");
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    showFormMessage(accountError, "New password and confirmation do not match.");
+    return;
+  }
+
+  state.adminAuth = { email: newEmail, passwordHash: await sha256Hex(newPassword) };
+  saveState();
+  accountForm.reset();
+  accountCurrentEmail.textContent = newEmail;
+  showFormMessage(accountSuccess, "Credentials updated. Share the new email and password with the next coordinator securely.");
+  showToast("Admin credentials updated");
 });
 
 adminForm.addEventListener("submit", (event) => {
@@ -1524,4 +1614,5 @@ initializeFilters();
 resetEditor();
 refresh();
 renderRoute();
+ensureAdminAuth().then(renderAdminAuth);
 initializeMotion();

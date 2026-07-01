@@ -72,7 +72,7 @@ The admin dashboard is intentionally more detailed than the public dashboard bec
 
 ### 3. Admin moderation
 
-The admin workspace simulates a CMS with a fake login and browser-local state.
+The admin workspace simulates a CMS with a validated coordinator login (email + password checked against a SHA-256 hash stored in browser-local state) and browser-local data. See `ADMIN-HANDOFF.md` for how to log in and change credentials.
 
 Admins can:
 
@@ -152,3 +152,4 @@ Defense and product documentation:
 - `.local/docs/PRD.md`
 - `.local/docs/README.md`
 - `.local/docs/DATABASE_SCHEMA.sql`
+- `ADMIN-HANDOFF.md` — non-technical guide for the folio coordinator: logging in, changing the admin email/password, and handing off the role.

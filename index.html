@@ -240,6 +240,7 @@
           <a href="#admin-analytics">Analytics</a>
           <a href="#admin-form">Editor</a>
           <a href="#admin-records">Records</a>
+          <a href="#admin-account">Account</a>
         </nav>
         <div class="admin-action-row">
           <a class="cms-button secondary" href="./">View public site</a>
@@ -249,12 +250,13 @@
 
       <main class="admin-shell">
         <section class="login-panel" id="login-panel">
-          <p class="section-index">PRIVATE WORKSPACE / FAKE LOGIN</p>
+          <p class="section-index">PRIVATE WORKSPACE / COORDINATOR LOGIN</p>
           <h1>Admin CMS</h1>
-          <p>Enter any email and password to simulate an authenticated admin session for the prototype.</p>
-          <form class="login-form" id="login-form">
-            <label>Email<input name="email" type="email" required placeholder="admin@mapua.edu.ph"></label>
-            <label>Password<input name="password" type="password" required placeholder="Any password"></label>
+          <p>Sign in with the registered folio coordinator email and password. Need access changed? See the handoff guide in <code>ADMIN-HANDOFF.md</code>.</p>
+          <form class="login-form" id="login-form" novalidate>
+            <p class="form-error" id="login-error" hidden></p>
+            <label>Email<input name="email" type="email" required autocomplete="username" placeholder="coordinator@email.com"></label>
+            <label>Password<input name="password" type="password" required autocomplete="current-password" placeholder="Enter your password"></label>
             <button class="primary-action" type="submit">Log in</button>
           </form>
         </section>
@@ -450,6 +452,37 @@
               </div>
             </section>
           </div>
+
+          <section class="account-panel" id="admin-account" aria-label="Admin account and handoff settings">
+            <div class="section-heading compact">
+              <div>
+                <p class="section-index">ACCOUNT / HANDOFF</p>
+                <h2>Manage coordinator login and prepare this workspace for the next admin.</h2>
+              </div>
+              <p>Change the coordinator email and password here whenever the role changes hands. No developer needed. Full step-by-step instructions live in <code>ADMIN-HANDOFF.md</code> at the root of this project.</p>
+            </div>
+            <div class="account-grid">
+              <article class="account-card">
+                <h3>Current sign-in email</h3>
+                <p class="account-current-email" id="account-current-email">&nbsp;</p>
+                <p class="account-hint">This is the email the next coordinator will use to log in.</p>
+              </article>
+              <article class="account-card account-card-wide">
+                <h3>Change email &amp; password</h3>
+                <form class="account-form" id="account-form">
+                  <p class="form-error" id="account-error" hidden></p>
+                  <p class="form-success" id="account-success" hidden></p>
+                  <label>Current password<input name="currentPassword" type="password" required autocomplete="current-password" placeholder="Confirm it's you"></label>
+                  <label>New coordinator email<input name="newEmail" type="email" required autocomplete="username" placeholder="coordinator@email.com"></label>
+                  <label>New password<input name="newPassword" type="password" required autocomplete="new-password" minlength="10" placeholder="At least 10 characters"></label>
+                  <label>Confirm new password<input name="confirmPassword" type="password" required autocomplete="new-password" placeholder="Re-type the new password"></label>
+                  <div class="editor-actions">
+                    <button class="primary-action" type="submit">Update credentials</button>
+                  </div>
+                </form>
+              </article>
+            </div>
+          </section>
         </section>
       </main>
       <footer class="admin-footer">
